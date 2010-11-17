@@ -5,7 +5,7 @@ public class Person {
     private String lastName;
     private int income;
     private String division;
-    
+
     public Person() {
     }
 

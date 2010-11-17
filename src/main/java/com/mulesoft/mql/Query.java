@@ -1,6 +1,9 @@
 package com.mulesoft.mql;
 
+import java.io.IOException;
+import java.io.PushbackReader;
 import java.io.Serializable;
+import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -13,6 +16,12 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.mvel.MVEL;
 
+import com.mulesoft.mql.grammar.lexer.Lexer;
+import com.mulesoft.mql.grammar.lexer.LexerException;
+import com.mulesoft.mql.grammar.node.Start;
+import com.mulesoft.mql.grammar.parser.Parser;
+import com.mulesoft.mql.grammar.parser.ParserException;
+import com.mulesoft.mql.impl.MqlInterpreter;
 import com.mulesoft.mql.impl.OrderByComparator;
 import com.mulesoft.mql.impl.WherePredicate;
 
@@ -24,11 +33,36 @@ public class Query {
         this.queryBuilder = queryBuilder;
     }
 
+    public static <T> Collection<T> execute(String queryString, Collection<?> items) {
+        Lexer lexer = new Lexer(new PushbackReader(new StringReader(queryString)));
+        Parser parser = new Parser(lexer);
+        
+        try {
+            Start ast = parser.parse();
+
+            /* Get our Interpreter going. */
+            MqlInterpreter interpreter = new MqlInterpreter();
+            ast.apply(interpreter);
+            
+            Query query = interpreter.getQuery();
+            
+            return query.execute(items);
+        } catch (ParserException e) {
+            throw new QueryException(e);
+        } catch (LexerException e) {
+            throw new QueryException(e);
+        } catch (IOException e) {
+            throw new QueryException(e);
+        }
+    }
+    
     public <T> Collection<T> execute(Collection<?> items) {
         ArrayList list = new ArrayList();
         
         // select the items based on the where clause
-        CollectionUtils.select(items, new WherePredicate(queryBuilder), list);
+        if (queryBuilder.getRestriction() != null) {
+            CollectionUtils.select(items, new WherePredicate(queryBuilder), list);
+        }
         
         // order the items 
         if (queryBuilder.getOrderBy() != null) {
@@ -101,4 +135,16 @@ public class Query {
         return t;
     }
 
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("from xxxx");
+        
+        if (queryBuilder.as != null) {
+            builder.append(" as ").append(queryBuilder.as);
+        }
+        if (queryBuilder.getRestriction() != null) {
+            builder.append(" where ").append(queryBuilder.getRestriction());
+        }
+        return builder.toString();
+    }
 }

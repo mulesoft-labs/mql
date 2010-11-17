@@ -18,6 +18,11 @@ public class Restriction {
         public String getName() {
             return name;
         }
+
+        @Override
+        public String toString() {
+            return "property[" + name + "]";
+        }
         
     }
     

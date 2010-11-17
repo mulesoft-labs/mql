@@ -104,10 +104,15 @@ public class WherePredicate implements Predicate {
 
     private Object evaluate(Object object, Object expression) {
         if (expression instanceof Property) {
+            String name = ((Property) expression).getName();
+            String objectPrefix = queryBuilder.getAs() + ".";
+            if (name.startsWith(objectPrefix)) {
+                name = name.substring(objectPrefix.length());
+            }
             try {
-                return PropertyUtils.getProperty(object, ((Property) expression).getName());
+                return PropertyUtils.getProperty(object, name);
             } catch (NoSuchMethodException e) {
-                throw new QueryException(MessageFormat.format("Property {0} does note exist on class {1}", expression, object.getClass()));
+                throw new QueryException(MessageFormat.format("Property {0} does note exist on class {1}", name, object.getClass()));
             } catch (Exception e) {
                throw new RuntimeException(e);
             }

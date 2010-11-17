@@ -1,0 +1,47 @@
+Package com.mulesoft.mql.grammar;
+
+Helpers
+
+all = [0 .. 127];
+escape_sequence =  '\' ''';
+s_char = [all -[''' + ['\' + [10 + 13]]]] | escape_sequence;
+string = s_char+;
+var = [['0'..'9']+[['a'..'z']+['A'..'Z']]]+;
+
+Tokens
+
+from = 'from';
+as = 'as';
+where = 'where';
+select = 'select';
+left_curly = '{';
+right_curly = '}';
+or = 'or';
+and = 'and';
+equals = '=';
+less_than = '<';
+comma = ',';
+single_quote = ''';
+double_quote = '"';
+basic_var = var;
+object_var = var '.' var ;
+left_paren = '(';
+right_paren = ')';
+number = [0-9]+;
+whitespace = (' ')+;
+string_literal = ''' string ''';
+
+Ignored Tokens
+
+whitespace;
+
+Productions
+/* from payload as p where */
+query = from [fromvar]:basic_var as [asvar]:basic_var where where_expression ;
+where_expression = 
+    {simple} where_clause |
+    {or} [left]:where_expression or [right]:where_clause |
+    {and} [left]:where_expression and [right]:where_clause ;
+where_clause = [left]:where_side comparator [right]:where_side;
+where_side = {variable} object_var | {string_literal} string_literal;
+comparator = {equals} equals | {lt} less_than;
