@@ -16,17 +16,37 @@ public class ParserTest extends Assert {
         List<Person> persons = getPersons();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where p.division = 'Sales'", persons);
+            Query.execute("from payload as p where p.division = 'Sales'", persons);
         
         assertEquals(3, result.size());
     }
     
     @Test
-    public void testSimpleParse() {
+    public void testAnd() {
         List<Person> persons = getPersons();
         
         Collection<Map> result = 
             Query.execute("from persons as p where p.division = 'Sales' and p.lastName = 'Schmoe'", persons);
+        
+        assertEquals(2, result.size());
+    }
+    
+    @Test
+    public void testOr() {
+        List<Person> persons = getPersons();
+        
+        Collection<Map> result = 
+            Query.execute("from persons as p where p.division = 'Sales' or p.lastName = 'Bar'", persons);
+        
+        assertEquals(4, result.size());
+    }
+    
+    @Test
+    public void testParens() {
+        List<Person> persons = getPersons();
+        
+        Collection<Map> result = 
+            Query.execute("from persons as p where (p.division = 'Sales' and p.lastName = 'Schmoe')", persons);
         
         assertEquals(2, result.size());
     }

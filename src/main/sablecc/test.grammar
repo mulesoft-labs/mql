@@ -40,6 +40,7 @@ Productions
 query = from [fromvar]:basic_var as [asvar]:basic_var where where_expression ;
 where_expression = 
     {simple} where_clause |
+    {parens} left_paren where_expression right_paren |
     {or} [left]:where_expression or [right]:where_clause |
     {and} [left]:where_expression and [right]:where_clause ;
 where_clause = [left]:where_side comparator [right]:where_side;

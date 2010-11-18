@@ -1,6 +1,7 @@
 package com.mulesoft.mql.impl;
 
 import static com.mulesoft.mql.Restriction.and;
+import static com.mulesoft.mql.Restriction.or;
 
 import java.util.Stack;
 
@@ -13,7 +14,6 @@ import com.mulesoft.mql.grammar.node.AEqualsComparator;
 import com.mulesoft.mql.grammar.node.ALtComparator;
 import com.mulesoft.mql.grammar.node.AOrWhereExpression;
 import com.mulesoft.mql.grammar.node.AQuery;
-import com.mulesoft.mql.grammar.node.ASimpleWhereExpression;
 import com.mulesoft.mql.grammar.node.AVariableWhereSide;
 import com.mulesoft.mql.grammar.node.AWhereClause;
 import com.mulesoft.mql.grammar.node.PWhereSide;
@@ -45,7 +45,7 @@ public class MqlInterpreter extends DepthFirstAdapter {
         Restriction right = restrictions.pop();
         Restriction left = restrictions.pop();
         
-        restrictions.add(and(left, right));
+        restrictions.add(or(left, right));
     }
 
     @Override
