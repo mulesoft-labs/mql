@@ -51,6 +51,25 @@ public class ParserTest extends Assert {
         assertEquals(2, result.size());
     }
     
+    @Test
+    public void testSelect() {
+        List<Person> persons = getPersons();
+        
+        Collection<Map> result = 
+            Query.execute(
+                    "from persons as p where p.firstName = 'Joe' " +
+            		"select new { " +
+            		"  name = p.firstName, " +
+            		"  division = p.division " +
+            		"}", persons);
+        
+        assertEquals(1, result.size());
+        
+        Map newItem = result.iterator().next();
+        assertEquals("Joe", newItem.get("name"));
+        assertEquals("Sales", newItem.get("division"));
+    }
+    
     private List<Person> getPersons() {
         List<Person> persons = new ArrayList<Person>();
         

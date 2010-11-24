@@ -5,6 +5,7 @@ Helpers
 all = [0 .. 127];
 escape_sequence =  '\' ''';
 s_char = [all -[''' + ['\' + [10 + 13]]]] | escape_sequence;
+expression_character = [all -['\' + [',' + '}']]];
 string = s_char+;
 var = [['0'..'9']+[['a'..'z']+['A'..'Z']]]+;
 
@@ -14,12 +15,16 @@ from = 'from';
 as = 'as';
 where = 'where';
 select = 'select';
+new = 'new';
 left_curly = '{';
 right_curly = '}';
 or = 'or';
 and = 'and';
 equals = '=';
 less_than = '<';
+greater_than = '>';
+less_than_equals = '<=';
+greater_than_equals = '>=';
 comma = ',';
 single_quote = ''';
 double_quote = '"';
@@ -29,6 +34,7 @@ left_paren = '(';
 right_paren = ')';
 number = [0-9]+;
 whitespace = (' ')+;
+// expression = (expression_character)+;
 string_literal = ''' string ''';
 
 Ignored Tokens
@@ -36,8 +42,11 @@ Ignored Tokens
 whitespace;
 
 Productions
-/* from payload as p where */
-query = from [fromvar]:basic_var as [asvar]:basic_var where where_expression ;
+/* Basic query structure */
+query = from [fromvar]:basic_var as [asvar]:basic_var where_statement? select_statement?;
+
+/* Where statement */
+where_statement = where where_expression;
 where_expression = 
     {simple} where_clause |
     {parens} left_paren where_expression right_paren |
@@ -45,4 +54,11 @@ where_expression =
     {and} [left]:where_expression and [right]:where_clause ;
 where_clause = [left]:where_side comparator [right]:where_side;
 where_side = {variable} object_var | {string_literal} string_literal;
-comparator = {equals} equals | {lt} less_than;
+comparator = {equals} equals | {lt} less_than | {lte} less_than_equals | {gt} greater_than | {gte} greater_than_equals;
+
+/* Selecte statement */
+select_statement = {select_new} select select_new_item | {select_properties} select select_properties;
+select_new_item = new left_curly select_new_item_list right_curly;
+select_new_item_property = basic_var equals object_var;
+select_new_item_list = {list} select_new_item_property comma select_new_item_list | {single} select_new_item_property;
+select_properties = basic_var;

@@ -28,7 +28,7 @@ public class ObjectBuilderTest extends Assert {
         Collection<Map> result = query.execute(persons);
         
         assertEquals(1, result.size());
-     
+
         Map newPerson = result.iterator().next();
         assertEquals(1, newPerson.size());
         assertEquals("Joe Schmoe", newPerson.get("name"));
