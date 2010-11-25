@@ -8,6 +8,7 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ParserTest extends Assert {
@@ -69,6 +70,26 @@ public class ParserTest extends Assert {
             		"  name = p.firstName, " +
             		"  division = p.division " +
             		"}", asMap("persons", persons));
+        
+        assertEquals(1, result.size());
+        
+        Map newItem = result.iterator().next();
+        assertEquals("Joe", newItem.get("name"));
+        assertEquals("Sales", newItem.get("division"));
+    }
+
+    @Test
+    @Ignore
+    public void testSelectWithExpression() {
+        List<Person> persons = getPersons();
+        
+        Collection<Map> result = 
+            Query.execute(
+                    "from persons as p where p.firstName = 'Joe' " +
+                    "select new { " +
+                    "  name = p.firstName + \" \" + p.lastName, " +
+                    "  division = p.division " +
+                    "}", asMap("persons", persons));
         
         assertEquals(1, result.size());
         
