@@ -2,6 +2,7 @@ package com.mulesoft.mql;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,17 +17,23 @@ public class ParserTest extends Assert {
         List<Person> persons = getPersons();
         
         Collection<Map> result = 
-            Query.execute("from payload as p where p.division = 'Sales'", persons);
+            Query.execute("from persons as p where p.division = 'Sales'", asMap("persons", persons));
         
         assertEquals(3, result.size());
     }
     
+    private Map<String, Object> asMap(String key, Object value) {
+        Map<String, Object> map = new HashMap<String,Object>();
+        map.put(key, value);
+        return map;
+    }
+
     @Test
     public void testAnd() {
         List<Person> persons = getPersons();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where p.division = 'Sales' and p.lastName = 'Schmoe'", persons);
+            Query.execute("from persons as p where p.division = 'Sales' and p.lastName = 'Schmoe'", asMap("persons", persons));
         
         assertEquals(2, result.size());
     }
@@ -36,7 +43,7 @@ public class ParserTest extends Assert {
         List<Person> persons = getPersons();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where p.division = 'Sales' or p.lastName = 'Bar'", persons);
+            Query.execute("from persons as p where p.division = 'Sales' or p.lastName = 'Bar'", asMap("persons", persons));
         
         assertEquals(4, result.size());
     }
@@ -46,7 +53,7 @@ public class ParserTest extends Assert {
         List<Person> persons = getPersons();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where (p.division = 'Sales' and p.lastName = 'Schmoe')", persons);
+            Query.execute("from persons as p where (p.division = 'Sales' and p.lastName = 'Schmoe')", asMap("persons", persons));
         
         assertEquals(2, result.size());
     }
@@ -61,7 +68,7 @@ public class ParserTest extends Assert {
             		"select new { " +
             		"  name = p.firstName, " +
             		"  division = p.division " +
-            		"}", persons);
+            		"}", asMap("persons", persons));
         
         assertEquals(1, result.size());
         

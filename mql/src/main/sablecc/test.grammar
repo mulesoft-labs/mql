@@ -56,7 +56,7 @@ where_clause = [left]:where_side comparator [right]:where_side;
 where_side = {variable} object_var | {string_literal} string_literal;
 comparator = {equals} equals | {lt} less_than | {lte} less_than_equals | {gt} greater_than | {gte} greater_than_equals;
 
-/* Selecte statement */
+/* Select statement */
 select_statement = {select_new} select select_new_item | {select_properties} select select_properties;
 select_new_item = new left_curly select_new_item_list right_curly;
 select_new_item_property = basic_var equals object_var;

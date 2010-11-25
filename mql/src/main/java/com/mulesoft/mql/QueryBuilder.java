@@ -3,6 +3,7 @@ package com.mulesoft.mql;
 
 public class QueryBuilder {
     
+    protected String from = "items";
     protected String as;
     protected String orderBy;
     protected int max = -1;
@@ -11,6 +12,11 @@ public class QueryBuilder {
 
     public QueryBuilder where(Restriction restriction) {
         this.restriction = restriction;
+        return this;
+    }
+
+    public QueryBuilder from(String from) {
+        this.from = from;
         return this;
     }
     
@@ -57,6 +63,10 @@ public class QueryBuilder {
 
     public Restriction getRestriction() {
         return restriction;
+    }
+
+    public String getFrom() {
+        return from;
     }
     
 }

@@ -31,7 +31,7 @@ public class MqlInterpreter extends DepthFirstAdapter {
     @Override
     public void caseAQuery(AQuery node) {
         queryBuilder = new QueryBuilder();
-        
+        queryBuilder.from(node.getFromvar().getText());
         queryBuilder.as(node.getAsvar().getText());
                    
         super.caseAQuery(node);

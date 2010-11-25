@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,7 +34,7 @@ public class Query {
         this.queryBuilder = queryBuilder;
     }
 
-    public static <T> Collection<T> execute(String queryString, Collection<?> items) {
+    public static <T> T execute(String queryString, Map<String,Object> context) {
         Lexer lexer = new Lexer(new PushbackReader(new StringReader(queryString)));
         Parser parser = new Parser(lexer);
         
@@ -46,7 +47,7 @@ public class Query {
             
             Query query = interpreter.getQuery();
             
-            return query.execute(items);
+            return query.execute(context);
         } catch (ParserException e) {
             throw new QueryException(e);
         } catch (LexerException e) {
@@ -56,12 +57,32 @@ public class Query {
         }
     }
     
-    public <T> Collection<T> execute(Collection<?> items) {
+    public <T> T execute(Collection<?> items) {
+        Map<String,Object> context = new HashMap<String,Object>();
+        context.put("items", items);
+        return execute(context);
+    }
+    
+    public <T> T execute(Map<String,Object> context) {
+        Collection<?> items;
+        Object from = context.get(queryBuilder.getFrom());
+        boolean selectSingleObject = false;
+        
+        if (from instanceof Collection) {
+            // transform a collection of objects
+            items = (Collection<?>) from;
+        } else {
+            // support transformation on a single object
+            items = Arrays.asList(from);
+            selectSingleObject = true;
+        }
         ArrayList list = new ArrayList();
         
         // select the items based on the where clause
         if (queryBuilder.getRestriction() != null) {
             CollectionUtils.select(items, new WherePredicate(queryBuilder), list);
+        } else {
+            list.addAll(items);
         }
         
         // order the items 
@@ -89,6 +110,7 @@ public class Query {
             ArrayList transformedObjects = new ArrayList();
             for (Object o : list) {
                 Map<String, Object> vars = new HashMap<String,Object>();
+                vars.putAll(context);
                 vars.put(queryBuilder.getAs(), o);
                 
                 Object transform;
@@ -103,7 +125,11 @@ public class Query {
             list = transformedObjects;
         }
         
-        return list;
+        if (selectSingleObject) {
+            return (T) (list.size() > 0 ? list.get(0) : null);
+        }
+        
+        return (T) list;
     }
     
     private Object transformToPojo(String clsName, Map<String, Serializable> compiledExpressions, Map<String, Object> vars) {
