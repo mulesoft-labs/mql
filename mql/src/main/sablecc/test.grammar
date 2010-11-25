@@ -5,7 +5,7 @@ Helpers
 all = [0 .. 127];
 escape_sequence =  '\' ''';
 s_char = [all -[''' + ['\' + [10 + 13]]]] | escape_sequence;
-expression_character = [all -['\' + [',' + '}']]];
+expression_character = [all -['\' + ['$' + [',' + '}']]]];
 string = s_char+;
 var = [['0'..'9']+[['a'..'z']+['A'..'Z']]]+;
 
@@ -34,7 +34,7 @@ left_paren = '(';
 right_paren = ')';
 number = [0-9]+;
 whitespace = (' ')+;
-// expression = (expression_character)+;
+expression = '$' (expression_character)+ '$';
 string_literal = ''' string ''';
 
 Ignored Tokens
@@ -59,6 +59,6 @@ comparator = {equals} equals | {lt} less_than | {lte} less_than_equals | {gt} gr
 /* Select statement */
 select_statement = {select_new} select select_new_item | {select_properties} select select_properties;
 select_new_item = new left_curly select_new_item_list right_curly;
-select_new_item_property = basic_var equals object_var;
+select_new_item_property = basic_var equals expression;
 select_new_item_list = {list} select_new_item_property comma select_new_item_list | {single} select_new_item_property;
 select_properties = basic_var;

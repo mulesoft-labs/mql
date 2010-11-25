@@ -67,9 +67,9 @@ public class ParserTest extends Assert {
             Query.execute(
                     "from persons as p where p.firstName = 'Joe' " +
             		"select new { " +
-            		"  name = p.firstName, " +
-            		"  division = p.division " +
-            		"}", asMap("persons", persons));
+            		"  name = $p.firstName$, " +
+            		"  division = $p.division$ " +
+            		" }", asMap("persons", persons));
         
         assertEquals(1, result.size());
         
@@ -79,7 +79,6 @@ public class ParserTest extends Assert {
     }
 
     @Test
-    @Ignore
     public void testSelectWithExpression() {
         List<Person> persons = getPersons();
         
@@ -87,10 +86,9 @@ public class ParserTest extends Assert {
             Query.execute(
                     "from persons as p where p.firstName = 'Joe' " +
                     "select new { " +
-                    "  name = p.firstName + \" \" + p.lastName, " +
-                    "  division = p.division " +
-                    "}", asMap("persons", persons));
-        
+                    "  name = $p.firstName + \" \" + p.lastName$, " +
+                    "  division = $p.division$ " +
+                    " }", asMap("persons", persons));
         assertEquals(1, result.size());
         
         Map newItem = result.iterator().next();

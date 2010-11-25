@@ -96,7 +96,8 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     @Override
     public void caseASelectNewItemProperty(ASelectNewItemProperty node) {
-        objectBuilder.set(node.getBasicVar().getText(), node.getObjectVar().getText());
+        String javaExpression = node.getExpression().getText().substring(1, node.getExpression().getText().length() - 1);
+        objectBuilder.set(node.getBasicVar().getText(), javaExpression);
         super.caseASelectNewItemProperty(node);
     }
 
