@@ -99,7 +99,7 @@ public class MqlInterpreter extends DepthFirstAdapter {
     public void caseASelectNewItemProperty(ASelectNewItemProperty node) {
         String javaExpression = node.getEqualsExpression().toString();
         javaExpression = parseSpaces(javaExpression); //hack
-        objectBuilder.set(node.getBasicVar().getText(), javaExpression);
+        objectBuilder.set(node.getIdentifier().getText(), javaExpression);
         super.caseASelectNewItemProperty(node);
     }
 
