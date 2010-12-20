@@ -82,6 +82,7 @@ public class MqlInterpreter extends DepthFirstAdapter {
     private Object getRestrictedObject(PWhereSide parsed) {
         String side = parsed.toString().trim();
         if (parsed instanceof AVariableWhereSide) {
+            side = side.replace(" ", ""); // hack
             return Restriction.property(side);
         }
         return side.substring(1, side.length()-1);
@@ -96,7 +97,8 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     @Override
     public void caseASelectNewItemProperty(ASelectNewItemProperty node) {
-        String javaExpression = node.getExpression().getText().substring(1, node.getExpression().getText().length() - 1);
+        String javaExpression = node.getEqualsExpression().toString();
+        javaExpression = javaExpression.replace(" ", ""); //hack
         objectBuilder.set(node.getBasicVar().getText(), javaExpression);
         super.caseASelectNewItemProperty(node);
     }

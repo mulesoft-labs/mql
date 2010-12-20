@@ -18,9 +18,11 @@ select = 'select';
 new = 'new';
 left_curly = '{';
 right_curly = '}';
+period = '.';
 or = 'or';
 and = 'and';
 equals = '=';
+plus = '+';
 less_than = '<';
 greater_than = '>';
 less_than_equals = '<=';
@@ -29,12 +31,10 @@ comma = ',';
 single_quote = ''';
 double_quote = '"';
 basic_var = var;
-object_var = var '.' var ;
 left_paren = '(';
 right_paren = ')';
 number = [0-9]+;
 whitespace = (' ')+;
-expression = '$' (expression_character)+ '$';
 string_literal = ''' string ''';
 
 Ignored Tokens
@@ -59,6 +59,17 @@ comparator = {equals} equals | {lt} less_than | {lte} less_than_equals | {gt} gr
 /* Select statement */
 select_statement = {select_new} select select_new_item | {select_properties} select select_properties;
 select_new_item = new left_curly select_new_item_list right_curly;
-select_new_item_property = basic_var equals expression;
 select_new_item_list = {list} select_new_item_property comma select_new_item_list | {single} select_new_item_property;
+select_new_item_property = basic_var equals [equals_expression]:mvel_expression;
 select_properties = basic_var;
+
+/* Java expressions */
+mvel_expression = mvel_expression_component
+  | {addition} [left]:mvel_expression_component plus [right]:mvel_expression; 
+mvel_function = object_var left_paren right_paren; 
+mvel_expression_component = {component_string} string_literal 
+  | {component_object} object_var
+  | {component_function} mvel_function;
+  | {component_number} number
+  
+object_var = {basic}basic_var | {ref} [first]:basic_var period [second]:object_var;
