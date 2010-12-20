@@ -67,7 +67,9 @@ public class ParserTest extends Assert {
                     "from persons as p where p.firstName = 'Joe' " +
             		"select new { " +
             		"  name = p.getFirstName() + ' ' + p.lastName, " +
-            		"  division = p.division " +
+            		"  division = p.division," +
+            		"  value = Math.min(1,5)," + // test a function with arguments
+            		"  char = p.firstName[0] " + // test an array
             		" }", asMap("persons", persons));
         
         assertEquals(1, result.size());
@@ -75,6 +77,8 @@ public class ParserTest extends Assert {
         Map newItem = result.iterator().next();
         assertEquals("JoeSchmoe", newItem.get("name"));
         assertEquals("Sales", newItem.get("division"));
+        assertEquals(1, newItem.get("value"));
+        assertEquals('J', newItem.get("char"));
     }
 
     @Test
@@ -85,13 +89,13 @@ public class ParserTest extends Assert {
             Query.execute(
                     "from persons as p where p.firstName = 'Joe' " +
                     "select new { " +
-                    "  name = p.firstName + \" \" + p.lastName, " +
-                    "  division = $p.division$ " +
+                    "  name = p.firstName + \' \' + p.lastName, " +
+                    "  division = p.division " +
                     "}", asMap("persons", persons));
         assertEquals(1, result.size());
         
         Map newItem = result.iterator().next();
-        assertEquals("Joe Schmoe", newItem.get("name"));
+        assertEquals("JoeSchmoe", newItem.get("name"));
         assertEquals("Sales", newItem.get("division"));
     }
     
