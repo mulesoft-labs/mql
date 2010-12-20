@@ -1,0 +1,42 @@
+Mashup Query Language
+
+This project is a LINQ like mechanism to query and transform data. Excuting 
+queries is simple:
+
+  // populate some data
+  List<Person> persons = new ArrayList<Person>();
+  persons.add(new Person("Dan", "Diephouse", "MuleSoft", "Engineering"));
+  persons.add(new Person("Joe", "Sales", "MuleSoft", "Sales"));
+  
+  // create a context for the query
+  Map<String,Object> context = new HashMap<String,Object>();
+
+  // execute the query
+  Collection<Person> result = 
+    Query.execute("from persons as p where p.division = 'Engineering'", context);
+  
+  assertEquals(1, result.size()); // the result will just contain the first person
+
+The query syntax is best illustrated by example queries below.
+
+Filtering Collections:
+
+from people as p where p.division = 'Sales'
+from people as p where p.division = 'Sales' and p.firstName = 'Dan'
+
+Ordering collections:
+
+from people as p order by name
+
+Transforming a collection into new objects:
+
+from people as p where p.division = 'Sales' 
+  select new {
+    href = 'http://localhost/sales/people/' + p.id,
+    name = p.firstName + ' ' + p.lastName,
+    division = p.division
+  }
+  
+This will create a new set of objects with href and name properties. The href 
+property will be a combination of the string url and the object id. The name
+property will be a synthesis of the first and last name.
