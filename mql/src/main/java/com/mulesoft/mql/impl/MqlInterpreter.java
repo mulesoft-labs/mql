@@ -98,9 +98,51 @@ public class MqlInterpreter extends DepthFirstAdapter {
     @Override
     public void caseASelectNewItemProperty(ASelectNewItemProperty node) {
         String javaExpression = node.getEqualsExpression().toString();
-        javaExpression = javaExpression.replace(" ", ""); //hack
+        javaExpression = parseSpaces(javaExpression); //hack
         objectBuilder.set(node.getBasicVar().getText(), javaExpression);
         super.caseASelectNewItemProperty(node);
+    }
+
+    /**
+     * Hack to parse out spaces from everything but string literals.
+     */
+    private String parseSpaces(String expr)
+    {
+        int start = 0;
+        return parseSpaces(expr, start);
+    }
+
+    private String parseSpaces(String expr, int start)
+    {
+        int singleQuoteEnd = expr.indexOf('\'', start);
+        int doubleQuoteEnd = expr.indexOf('"', start);
+        if (singleQuoteEnd == -1) {
+            singleQuoteEnd = expr.length();
+        }
+        if (doubleQuoteEnd == -1) {
+            doubleQuoteEnd = expr.length();
+        }
+        int end = Math.min(singleQuoteEnd, doubleQuoteEnd);
+        
+        String newExpr = expr.substring(0, start) 
+            + expr.substring(start, end).replace(" ", "") ;
+        
+        if (end == expr.length())
+        {
+            return newExpr;
+        }
+        else
+        {
+            newExpr = newExpr + expr.substring(end);
+            int newStart;
+            if (singleQuoteEnd < doubleQuoteEnd) {
+                newStart = newExpr.indexOf('\'', start);
+            } else {
+                newStart = newExpr.indexOf('\"', start);
+            }
+            newStart += 3;
+            return parseSpaces(newExpr, newStart);
+        }
     }
 
     @Override
@@ -111,6 +153,4 @@ public class MqlInterpreter extends DepthFirstAdapter {
     public Query getQuery() {
         return queryBuilder.build();
     }
-    
-
 }

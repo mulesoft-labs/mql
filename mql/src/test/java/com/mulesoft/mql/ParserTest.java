@@ -75,7 +75,7 @@ public class ParserTest extends Assert {
         assertEquals(1, result.size());
         
         Map newItem = result.iterator().next();
-        assertEquals("JoeSchmoe", newItem.get("name"));
+        assertEquals("Joe Schmoe", newItem.get("name"));
         assertEquals("Sales", newItem.get("division"));
         assertEquals(1, newItem.get("value"));
         assertEquals('J', newItem.get("char"));
@@ -95,7 +95,7 @@ public class ParserTest extends Assert {
         assertEquals(1, result.size());
         
         Map newItem = result.iterator().next();
-        assertEquals("JoeSchmoe", newItem.get("name"));
+        assertEquals("Joe Schmoe", newItem.get("name"));
         assertEquals("Sales", newItem.get("division"));
     }
     

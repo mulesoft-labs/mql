@@ -8,6 +8,8 @@ s_char = [all -[''' + ['\' + [10 + 13]]]] | escape_sequence;
 expression_character = [all -['\' + ['$' + [',' + '}']]]];
 string = s_char+;
 var = [['0'..'9']+[['a'..'z']+['A'..'Z']]]+;
+single_quote = ''';
+double_quote = '"';
 
 Tokens
 
@@ -35,8 +37,6 @@ greater_than_equals = '>=';
 equality = '==';
 not_equals = '!=';
 comma = ',';
-single_quote = ''';
-double_quote = '"';
 basic_var = var;
 left_paren = '(';
 right_paren = ')';
@@ -44,7 +44,8 @@ left_bracket = '[';
 right_bracket = ']';
 number = [0-9]+;
 whitespace = (' ')+;
-string_literal = ''' string ''';
+single_quote_string = ''' string ''';
+double_quote_string = double_quote string double_quote;
 question_mark = '?';
 
 // mvel operators
@@ -82,7 +83,7 @@ select_new_item_list = {list} select_new_item_property comma select_new_item_lis
 select_new_item_property = basic_var equals [equals_expression]:mvel_expression;
 select_properties = object_var;
 
-/* Java expressions */
+/* MVEL expressions */
 mvel_operator = {plus} plus | {divide} divide | {multiply} multiply | {minus} minus 
   | {amperstand} amperstand | {pipe} pipe | {less_than} less_than | {greater_than} greater_than
   | {less_than_equals} less_than | {greater_than_equals} greater_than_equals
@@ -99,6 +100,7 @@ mvel_expression_component = {component_array} mvel_expression_component left_bra
   | {component_function} mvel_function
   | {component_number} number;
   
+string_literal = {double} double_quote_string | {single} single_quote_string;
 object_var = {basic}basic_var 
   | {ref} [first]:basic_var period question_mark? [second]:object_var;
   
