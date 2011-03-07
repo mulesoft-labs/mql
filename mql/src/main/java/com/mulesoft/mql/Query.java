@@ -53,7 +53,7 @@ public class Query {
         wherePredicate = getWhere();
     }
 
-    public static <T> T execute(String queryString, Map<String,Object> context) {
+    public static Query create(String queryString) {
         Lexer lexer = new Lexer(new PushbackReader(new StringReader(queryString)));
         Parser parser = new Parser(lexer);
         
@@ -64,9 +64,7 @@ public class Query {
             MqlInterpreter interpreter = new MqlInterpreter();
             ast.apply(interpreter);
             
-            Query query = interpreter.getQuery();
-            
-            return query.execute(context);
+            return interpreter.getQuery();
         } catch (ParserException e) {
             throw new QueryException(e);
         } catch (LexerException e) {
@@ -74,6 +72,9 @@ public class Query {
         } catch (IOException e) {
             throw new QueryException(e);
         }
+    }
+    public static <T> T execute(String queryString, Map<String,Object> context) {
+        return create(queryString).execute(context);
     }
     
     public <T> T execute(Collection<?> items) {
