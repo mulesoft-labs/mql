@@ -1,10 +1,8 @@
 package com.mulesoft.mql.impl;
 
+import static com.mulesoft.mql.ObjectBuilder.newObject;
 import static com.mulesoft.mql.Restriction.and;
 import static com.mulesoft.mql.Restriction.or;
-import static com.mulesoft.mql.ObjectBuilder.*;
-
-import java.util.Stack;
 
 import com.mulesoft.mql.ObjectBuilder;
 import com.mulesoft.mql.Query;
@@ -13,6 +11,7 @@ import com.mulesoft.mql.Restriction;
 import com.mulesoft.mql.grammar.analysis.DepthFirstAdapter;
 import com.mulesoft.mql.grammar.node.AAndWhereExpression;
 import com.mulesoft.mql.grammar.node.AEqualsComparator;
+import com.mulesoft.mql.grammar.node.AJoinJoinStatement;
 import com.mulesoft.mql.grammar.node.ALtComparator;
 import com.mulesoft.mql.grammar.node.AOrWhereExpression;
 import com.mulesoft.mql.grammar.node.AQuery;
@@ -21,6 +20,8 @@ import com.mulesoft.mql.grammar.node.ASelectNewItemProperty;
 import com.mulesoft.mql.grammar.node.AVariableWhereSide;
 import com.mulesoft.mql.grammar.node.AWhereClause;
 import com.mulesoft.mql.grammar.node.PWhereSide;
+
+import java.util.Stack;
 
 public class MqlInterpreter extends DepthFirstAdapter {
 
@@ -41,6 +42,13 @@ public class MqlInterpreter extends DepthFirstAdapter {
         } else if (restrictions.size() > 0) {
             throw new IllegalStateException("Too many restrictions!");
         }
+    }
+
+    @Override
+    public void inAJoinJoinStatement(AJoinJoinStatement node) {
+        queryBuilder.join(parseSpaces(node.getJoinexpression().toString()), node.getAsvar().getText());
+
+        super.inAJoinJoinStatement(node);
     }
 
     @Override

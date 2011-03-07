@@ -4,12 +4,13 @@ package com.mulesoft.mql;
 public class QueryBuilder {
     
     protected String from = "items";
-    protected String as;
+    protected String as = "item";
     protected String orderBy;
-    protected int max = -1;
+    protected int max = Integer.MAX_VALUE;
     protected ObjectBuilder select;
     private Restriction restriction;
-
+    private Join join;
+    
     public QueryBuilder where(Restriction restriction) {
         this.restriction = restriction;
         return this;
@@ -67,6 +68,17 @@ public class QueryBuilder {
 
     public String getFrom() {
         return from;
+    }
+
+    public QueryBuilder join(String expression, String as) {
+        join = new Join();
+        join.setExpression(expression);
+        join.setAs(as);
+        return this;
+    }
+
+    public Join getJoin() {
+        return join;
     }
     
 }

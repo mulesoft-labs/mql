@@ -5,6 +5,7 @@ public class Person {
     private String lastName;
     private int income;
     private String division;
+    private String twitterId;
 
     public Person() {
     }
@@ -15,6 +16,15 @@ public class Person {
         this.lastName = lastName;
         this.income = income;
         this.division = division;
+    }
+
+    public Person(String firstName, String lastName, String division, int income, String twitterId) {
+        super();
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.income = income;
+        this.division = division;
+        this.twitterId = twitterId;
     }
 
     public String getDivision() {
@@ -47,6 +57,14 @@ public class Person {
 
     public void setIncome(int income) {
         this.income = income;
+    }
+
+    public String getTwitterId() {
+        return twitterId;
+    }
+
+    public void setTwitterId(String twitterId) {
+        this.twitterId = twitterId;
     }
 
 }

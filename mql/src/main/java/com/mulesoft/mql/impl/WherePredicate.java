@@ -1,20 +1,47 @@
 package com.mulesoft.mql.impl;
 
-import java.text.MessageFormat;
-
-import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.collections.Predicate;
-
 import com.mulesoft.mql.QueryBuilder;
 import com.mulesoft.mql.QueryException;
 import com.mulesoft.mql.Restriction;
 import com.mulesoft.mql.Restriction.Property;
 
+import java.io.Serializable;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.collections.Predicate;
+import org.mvel.MVEL;
+
 public class WherePredicate implements Predicate {
     private final QueryBuilder queryBuilder;
+    // Property -> MVEL expressions
+    private Map<Property,Serializable> compiledExpressions = new HashMap<Property,Serializable>();
 
     public WherePredicate(QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
+        
+        Restriction restriction = queryBuilder.getRestriction();
+        initializeExpressions(restriction);
+    }
+
+    private void initializeExpressions(Restriction restriction) {
+        initializeExpression(restriction.getLeft());
+        initializeExpression(restriction.getRight());
+    }
+
+    private void initializeExpression(Object o) {
+        if (o instanceof Restriction) {
+            initializeExpressions((Restriction) o);
+            return;
+        }
+        if (!(o instanceof Property)) {
+            return;
+        }
+        
+        String expression = ((Property) o).getName();
+        
+        compiledExpressions.put((Property)o, MVEL.compileExpression(expression));
     }
 
     public boolean evaluate(Object object) {
@@ -104,18 +131,12 @@ public class WherePredicate implements Predicate {
 
     private Object evaluate(Object object, Object expression) {
         if (expression instanceof Property) {
-            String name = ((Property) expression).getName();
-            String objectPrefix = queryBuilder.getAs() + ".";
-            if (name.startsWith(objectPrefix)) {
-                name = name.substring(objectPrefix.length());
-            }
-            try {
-                return PropertyUtils.getProperty(object, name);
-            } catch (NoSuchMethodException e) {
-                throw new QueryException(MessageFormat.format("Property {0} does note exist on class {1}", name, object.getClass()));
-            } catch (Exception e) {
-               throw new RuntimeException(e);
-            }
+            Serializable compiled = compiledExpressions.get((Property)expression);
+
+            Map<String,Object> vars = (Map<String,Object>) object;
+            Object ctx = vars.get(queryBuilder.getAs()); 
+            
+            return MVEL.executeExpression(compiled, ctx, vars);
         } else {
             return expression;
         }

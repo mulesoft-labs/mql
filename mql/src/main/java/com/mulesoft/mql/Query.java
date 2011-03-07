@@ -1,5 +1,15 @@
 package com.mulesoft.mql;
 
+import com.mulesoft.mql.grammar.lexer.Lexer;
+import com.mulesoft.mql.grammar.lexer.LexerException;
+import com.mulesoft.mql.grammar.node.Start;
+import com.mulesoft.mql.grammar.parser.Parser;
+import com.mulesoft.mql.grammar.parser.ParserException;
+import com.mulesoft.mql.impl.JoinPredicate;
+import com.mulesoft.mql.impl.MqlInterpreter;
+import com.mulesoft.mql.impl.OrderByComparator;
+import com.mulesoft.mql.impl.WherePredicate;
+
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Serializable;
@@ -11,27 +21,36 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.collections.functors.AndPredicate;
+import org.apache.commons.collections.functors.TruePredicate;
 import org.mvel.MVEL;
-
-import com.mulesoft.mql.grammar.lexer.Lexer;
-import com.mulesoft.mql.grammar.lexer.LexerException;
-import com.mulesoft.mql.grammar.node.Start;
-import com.mulesoft.mql.grammar.parser.Parser;
-import com.mulesoft.mql.grammar.parser.ParserException;
-import com.mulesoft.mql.impl.MqlInterpreter;
-import com.mulesoft.mql.impl.OrderByComparator;
-import com.mulesoft.mql.impl.WherePredicate;
 
 public class Query {
 
     private final QueryBuilder queryBuilder;
+    private Map<String,Serializable> compiledExpressions = new HashMap<String,Serializable>();
+    private Predicate joinPredicate;
+    private Predicate wherePredicate;
 
     public Query(QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
+
+        ObjectBuilder select = queryBuilder.getSelect();
+        if (select != null) {
+            // Compile MVEL expressions
+            for (Map.Entry<String,String> e : select.getPropertyToExpression().entrySet()) {
+                compiledExpressions.put(e.getKey(), MVEL.compileExpression(e.getValue()));
+            }
+        }
+
+
+        joinPredicate = getJoin();
+        wherePredicate = getWhere();
     }
 
     public static <T> T execute(String queryString, Map<String,Object> context) {
@@ -76,63 +95,92 @@ public class Query {
             items = Arrays.asList(from);
             selectSingleObject = true;
         }
-        ArrayList list = new ArrayList();
         
-        // select the items based on the where clause
-        if (queryBuilder.getRestriction() != null) {
-            CollectionUtils.select(items, new WherePredicate(queryBuilder), list);
-        } else {
-            list.addAll(items);
+        List<Map<String,Object>> itemsAsMaps = new ArrayList<Map<String,Object>>();
+        for (Object o : items) {
+            if (o == null) {
+                throw new IllegalStateException("null items are not allowed in the list of queryable objects.");
+            }
+            Map<String, Object> vars = new HashMap<String,Object>();
+            vars.putAll(context);
+            vars.put(queryBuilder.getAs(), o);
+            itemsAsMaps.add(vars);
         }
         
+        ArrayList resultList = new ArrayList();
+
+        joinAndFilter(itemsAsMaps, resultList);
+        order(resultList);
+        resultList = doSelect(resultList);
+        
+        if (selectSingleObject) {
+            return (T) (resultList.size() > 0 ? resultList.get(0) : null);
+        }
+        
+        return (T) resultList;
+    }
+
+    protected void order(ArrayList resultList) {
         // order the items 
         if (queryBuilder.getOrderBy() != null) {
-            Collections.sort(list, new OrderByComparator(queryBuilder));
+            Collections.sort(resultList, new OrderByComparator(queryBuilder));
         }
-        
-        // Filter out any items over the max size
-        if (queryBuilder.getMax() > -1) {
-            for (int i = queryBuilder.getMax(); i < list.size(); i++) {
-                list.remove(i);
+    }
+
+    protected void joinAndFilter(List<Map<String, Object>> itemsAsMaps, ArrayList resultList) {
+        Predicate predicate = AndPredicate.getInstance(joinPredicate, wherePredicate);
+        for (int i = 0; i < itemsAsMaps.size() && i < queryBuilder.getMax(); i++) {
+            Map<String, Object> object = itemsAsMaps.get(i);
+            if (predicate.evaluate(object)) {
+                resultList.add(object);
             }
         }
-        
+    }
+
+    protected ArrayList doSelect(ArrayList list) {
         // transform the items
         ObjectBuilder select = queryBuilder.getSelect();
         if (select != null) {
-            // Compile MVEL expressions
-            Map<String,Serializable> compiledExpressions = new HashMap<String,Serializable>();
-            for (Map.Entry<String,String> e : select.getPropertyToExpression().entrySet()) {
-                compiledExpressions.put(e.getKey(), MVEL.compileExpression(e.getValue()));
-            }
-            
             // Transform individual objects
             ArrayList transformedObjects = new ArrayList();
             for (Object o : list) {
-                Map<String, Object> vars = new HashMap<String,Object>();
-                vars.putAll(context);
-                vars.put(queryBuilder.getAs(), o);
+                Map<String, Object> vars = (Map<String,Object>) o;
                 
                 Object transform;
                 if (select.getTransformClass() == null) {
-                    transform = transformToMap(compiledExpressions, vars);
+                    transform = transformToMap(vars);
                 } else {
-                    transform = transformToPojo(select.getTransformClass(), compiledExpressions, vars);
+                    transform = transformToPojo(select.getTransformClass(), vars);
                 }
                 transformedObjects.add(transform);
             }
             
             list = transformedObjects;
         }
-        
-        if (selectSingleObject) {
-            return (T) (list.size() > 0 ? list.get(0) : null);
+        return list;
+    }
+
+    protected Predicate getJoin() {
+        final Predicate joinPredicate;
+        if (queryBuilder.getJoin() != null) {
+            joinPredicate = new JoinPredicate(queryBuilder);
+        } else {
+            joinPredicate = TruePredicate.INSTANCE;
         }
-        
-        return (T) list;
+        return joinPredicate;
+    }
+
+    protected Predicate getWhere() {
+        final Predicate wherePredicate;
+        if (queryBuilder.getRestriction() != null) {
+            wherePredicate = new WherePredicate(queryBuilder);
+        } else {
+            wherePredicate = TruePredicate.INSTANCE;
+        }
+        return wherePredicate;
     }
     
-    private Object transformToPojo(String clsName, Map<String, Serializable> compiledExpressions, Map<String, Object> vars) {
+    private Object transformToPojo(String clsName, Map<String, Object> vars) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
             Class<?> cls = cl.loadClass(clsName);
@@ -152,7 +200,7 @@ public class Query {
         }
     }
 
-    private Map<String, Object> transformToMap(Map<String, Serializable> compiledExpressions, Map<String, Object> vars) {
+    private Map<String, Object> transformToMap(Map<String, Object> vars) {
         Map<String, Object> t = new HashMap<String,Object>();
         
         for (Map.Entry<String,Serializable> e : compiledExpressions.entrySet()) {

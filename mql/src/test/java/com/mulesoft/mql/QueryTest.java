@@ -26,9 +26,7 @@ public class QueryTest extends Assert {
                       .set("income", "p.income")).build();
         
         Collection<Map> result = query.execute(persons);
-        
         assertEquals(3, result.size());
-        
     }
     
     

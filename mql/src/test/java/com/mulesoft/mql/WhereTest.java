@@ -24,6 +24,7 @@ public class WhereTest extends Assert {
         List<Person> persons = getPersons();
         
         Query query = new QueryBuilder()
+            .as("p")
             .where(eq(property("division"), "Sales"))
             .build();
         
