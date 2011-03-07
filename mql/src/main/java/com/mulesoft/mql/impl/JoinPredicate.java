@@ -9,7 +9,7 @@
  */
 package com.mulesoft.mql.impl;
 
-import com.mulesoft.mql.Join;
+import com.mulesoft.mql.JoinBuilder;
 import com.mulesoft.mql.QueryBuilder;
 
 import java.io.Serializable;
@@ -22,7 +22,7 @@ public class JoinPredicate implements Predicate {
 
     private final QueryBuilder queryBuilder;
     private Serializable compiledExpression;
-    private Join join;
+    private JoinBuilder join;
 
     public JoinPredicate(QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;

@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.Predicate;
@@ -32,10 +33,12 @@ import org.mvel.MVEL;
 
 public class Query {
 
+
     private final QueryBuilder queryBuilder;
     private Map<String,Serializable> compiledExpressions = new HashMap<String,Serializable>();
     private Predicate joinPredicate;
     private Predicate wherePredicate;
+    private JoinBuilder joinBuilder;
 
     public Query(QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
@@ -48,7 +51,7 @@ public class Query {
             }
         }
 
-
+        joinBuilder = queryBuilder.getJoin();
         joinPredicate = getJoin();
         wherePredicate = getWhere();
     }
@@ -77,9 +80,28 @@ public class Query {
         return create(queryString).execute(context);
     }
     
+    /**
+     * Execute the query against a collection of objects. These objects will get named as "items"
+     * in your variable context. Generally the execute(Map<String,Object>) method should be
+     * used, but this is just too handy to take out.
+     * @param <T>
+     * @param items
+     * @return
+     */
     public <T> T execute(Collection<?> items) {
+        return execute(items, "items");
+    }
+    
+    /**
+     * Execute the query against a collection of objects which will be given the specified 
+     * name inside the variable context.
+     * @param <T>
+     * @param items
+     * @return
+     */
+    public <T> T execute(Collection<?> items, String as) {
         Map<String,Object> context = new HashMap<String,Object>();
-        context.put("items", items);
+        context.put(as, items);
         return execute(context);
     }
     
@@ -130,11 +152,38 @@ public class Query {
 
     protected void joinAndFilter(List<Map<String, Object>> itemsAsMaps, ArrayList resultList) {
         Predicate predicate = AndPredicate.getInstance(joinPredicate, wherePredicate);
+        
+        if (joinBuilder != null && joinBuilder.isAsync()) {
+            doAsyncJoinAndFilter(itemsAsMaps, resultList, predicate);
+        } else {
+            doSyncJoinAndFilter(itemsAsMaps, resultList, predicate);
+        }
+    }
+
+    protected void doSyncJoinAndFilter(List<Map<String, Object>> itemsAsMaps, ArrayList resultList, Predicate predicate) {
         for (int i = 0; i < itemsAsMaps.size() && i < queryBuilder.getMax(); i++) {
             Map<String, Object> object = itemsAsMaps.get(i);
             if (predicate.evaluate(object)) {
                 resultList.add(object);
             }
+        }
+    }
+
+    protected void doAsyncJoinAndFilter(final List<Map<String, Object>> itemsAsMaps, 
+                                        final ArrayList resultList, 
+                                        final Predicate predicate) {
+        Executor executor = joinBuilder.getExecutor();
+
+        final List syncedList = Collections.synchronizedList(resultList);
+
+        for (int i = 0; i < itemsAsMaps.size(); i++) {
+            Map<String, Object> object = itemsAsMaps.get(i);
+            Runnable joiner = new JoinAndFilterRunnable(object, predicate, resultList, syncedList);
+            executor.execute(joiner);
+        }
+        
+        for (int i = resultList.size(); i >= queryBuilder.getMax(); i--) {
+            resultList.remove(queryBuilder.getMax());
         }
     }
 
@@ -222,4 +271,32 @@ public class Query {
         }
         return builder.toString();
     }
+
+    private final class JoinAndFilterRunnable implements Runnable {
+        private final Predicate predicate;
+        private final ArrayList resultList;
+        private final Map<String, Object> object;
+        private final List syncedList;
+
+        private JoinAndFilterRunnable(Map<String, Object> object, 
+                                      Predicate predicate, 
+                                      ArrayList resultList,
+                                      List syncedList) {
+            this.object = object;
+            this.predicate = predicate;
+            this.resultList = resultList;
+            this.syncedList = syncedList;
+        }
+
+        public void run() {
+            if (syncedList.size() >= queryBuilder.getMax()) {
+                return;
+            }
+            
+            if (predicate.evaluate(object)) {
+                resultList.add(object);
+            }
+        }
+    }
 }
+

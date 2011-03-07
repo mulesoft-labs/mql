@@ -1,5 +1,7 @@
 package com.mulesoft.mql;
 
+import java.util.concurrent.Executor;
+
 
 public class QueryBuilder {
     
@@ -9,7 +11,7 @@ public class QueryBuilder {
     protected int max = Integer.MAX_VALUE;
     protected ObjectBuilder select;
     private Restriction restriction;
-    private Join join;
+    private JoinBuilder join;
     
     public QueryBuilder where(Restriction restriction) {
         this.restriction = restriction;
@@ -70,14 +72,47 @@ public class QueryBuilder {
         return from;
     }
 
-    public QueryBuilder join(String expression, String as) {
-        join = new Join();
-        join.setExpression(expression);
-        join.setAs(as);
+    public QueryBuilder join(JoinBuilder join) {
+        this.join = join;
         return this;
     }
 
-    public Join getJoin() {
+
+    public QueryBuilder join(String expression, String as) {
+        join = new JoinBuilder();
+        join.expression(expression);
+        join.as(as);
+        return this;
+    }
+    
+    /**
+     * Asynchronously join with a default of 10 threads.
+     */
+    public QueryBuilder joinAsync(String expression, String as) {
+        return joinAsync(expression, as, 10);
+    }
+    
+    /**
+     * Asynchronously join with the specified number of threads.
+     */
+    public QueryBuilder joinAsync(String expression, String as, int threads) {
+        this.join = JoinBuilder.expression(expression, as).async().threads(threads);
+        return this;
+    }
+    
+    /**
+     * Asynchronously join with the specified number of threads.
+     */
+    public QueryBuilder joinAsync(String expression, String as, Executor executor) {
+        join = new JoinBuilder()
+            .expression(expression)
+            .as(as)
+            .async()
+            .executor(executor);
+        return this;
+    }
+
+    public JoinBuilder getJoin() {
         return join;
     }
     
