@@ -3,20 +3,25 @@ package com.mulesoft.mql.impl;
 import static com.mulesoft.mql.ObjectBuilder.newObject;
 import static com.mulesoft.mql.Restriction.and;
 import static com.mulesoft.mql.Restriction.or;
+import static com.mulesoft.mql.JoinBuilder.*;
 
+import com.mulesoft.mql.JoinBuilder;
 import com.mulesoft.mql.ObjectBuilder;
 import com.mulesoft.mql.Query;
 import com.mulesoft.mql.QueryBuilder;
 import com.mulesoft.mql.Restriction;
 import com.mulesoft.mql.grammar.analysis.DepthFirstAdapter;
 import com.mulesoft.mql.grammar.node.AAndWhereExpression;
+import com.mulesoft.mql.grammar.node.AAsyncStatement;
 import com.mulesoft.mql.grammar.node.AEqualsComparator;
 import com.mulesoft.mql.grammar.node.AJoinJoinStatement;
 import com.mulesoft.mql.grammar.node.ALtComparator;
+import com.mulesoft.mql.grammar.node.AOnStatement;
 import com.mulesoft.mql.grammar.node.AOrWhereExpression;
 import com.mulesoft.mql.grammar.node.AQuery;
 import com.mulesoft.mql.grammar.node.ASelectNewItem;
 import com.mulesoft.mql.grammar.node.ASelectNewItemProperty;
+import com.mulesoft.mql.grammar.node.AThreadStatement;
 import com.mulesoft.mql.grammar.node.AVariableWhereSide;
 import com.mulesoft.mql.grammar.node.AWhereClause;
 import com.mulesoft.mql.grammar.node.PWhereSide;
@@ -28,6 +33,7 @@ public class MqlInterpreter extends DepthFirstAdapter {
     private QueryBuilder queryBuilder;
     private Stack<Restriction> restrictions = new Stack<Restriction>();
     private ObjectBuilder objectBuilder;
+    private JoinBuilder join;
 
     @Override
     public void caseAQuery(AQuery node) {
@@ -46,9 +52,28 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     @Override
     public void inAJoinJoinStatement(AJoinJoinStatement node) {
-        queryBuilder.join(parseSpaces(node.getJoinexpression().toString()), node.getAsvar().getText());
+        join = expression(parseSpaces(node.getJoinexpression().toString()), node.getAsvar().getText());
+        queryBuilder.join(join);
 
         super.inAJoinJoinStatement(node);
+    }
+
+    @Override
+    public void caseAOnStatement(AOnStatement node) {
+        join.on(parseSpaces(node.getOnExpression().toString()));
+        super.caseAOnStatement(node);
+    }
+
+    @Override
+    public void caseAAsyncStatement(AAsyncStatement node) {
+        join.async();
+        super.caseAAsyncStatement(node);
+    }
+
+    @Override
+    public void caseAThreadStatement(AThreadStatement node) {
+        join.threads(Integer.valueOf(node.getThreadCount().toString().trim()));
+        super.caseAThreadStatement(node);
     }
 
     @Override

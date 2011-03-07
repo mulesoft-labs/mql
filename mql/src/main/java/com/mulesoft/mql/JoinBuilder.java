@@ -19,7 +19,7 @@ public class JoinBuilder {
     private String as;
     private String on;
     private boolean async;
-    private int threads;
+    private int threads = 10;
     private Executor executor;
     
     public static JoinBuilder expression(String expression, String as) {

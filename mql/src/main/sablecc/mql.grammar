@@ -107,6 +107,8 @@ Tokens
   where = 'where';
   select = 'select';
   join = 'join';
+  on = 'on';
+  async = 'async';
   new = 'new';
   left_curly = '{';
   right_curly = '}';
@@ -169,8 +171,11 @@ Productions
   /* Basic query structure */
   query = from [fromvar]:identifier as [asvar]:identifier join_statement? where_statement? select_statement?;
 
-  join_statement = {join} join [joinexpression]:mvel_expression [joinas]:as [asvar]:identifier;
-      
+  join_statement = {join} join [joinexpression]:mvel_expression [joinas]:as [asvar]:identifier on_statement? async_statement?;
+  on_statement = on [on_expression]:mvel_expression;
+  async_statement = async thread_statement?;
+  thread_statement = left_paren [thread_count]:integer_literal right_paren;
+        
   /* Where statement */
   where_statement = where where_expression;
   where_expression = 

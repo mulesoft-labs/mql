@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 
 import org.apache.commons.beanutils.PropertyUtils;
@@ -175,11 +176,17 @@ public class Query {
         Executor executor = joinBuilder.getExecutor();
 
         final List syncedList = Collections.synchronizedList(resultList);
-
+        
+        CountDownLatch latch = new CountDownLatch(itemsAsMaps.size());
         for (int i = 0; i < itemsAsMaps.size(); i++) {
             Map<String, Object> object = itemsAsMaps.get(i);
-            Runnable joiner = new JoinAndFilterRunnable(object, predicate, resultList, syncedList);
+            Runnable joiner = new JoinAndFilterRunnable(object, predicate, resultList, syncedList, latch);
             executor.execute(joiner);
+        }
+        
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
         }
         
         for (int i = resultList.size(); i >= queryBuilder.getMax(); i--) {
@@ -277,24 +284,31 @@ public class Query {
         private final ArrayList resultList;
         private final Map<String, Object> object;
         private final List syncedList;
+        private final CountDownLatch latch;
 
         private JoinAndFilterRunnable(Map<String, Object> object, 
                                       Predicate predicate, 
                                       ArrayList resultList,
-                                      List syncedList) {
+                                      List syncedList, 
+                                      CountDownLatch latch) {
             this.object = object;
             this.predicate = predicate;
             this.resultList = resultList;
             this.syncedList = syncedList;
+            this.latch = latch;
         }
 
         public void run() {
-            if (syncedList.size() >= queryBuilder.getMax()) {
-                return;
-            }
-            
-            if (predicate.evaluate(object)) {
-                resultList.add(object);
+            try {
+                if (syncedList.size() >= queryBuilder.getMax()) {
+                    return;
+                }
+                
+                if (predicate.evaluate(object)) {
+                    resultList.add(object);
+                }
+            } finally {
+                latch.countDown();
             }
         }
     }

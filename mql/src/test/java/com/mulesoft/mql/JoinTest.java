@@ -23,9 +23,6 @@ public class JoinTest extends Assert {
     
     @Test
     public void findTotalTweets() throws Exception {
-        List<Person> persons = getPersons();
-        
-        Twitter twitter = getMockTwitter();
         Query query = new QueryBuilder()
             .from("persons")
             .as("p")
@@ -34,10 +31,8 @@ public class JoinTest extends Assert {
                         .set("name", "p.firstName + \" \" + p.lastName")
                         .set("tweets", "twitterInfo.totalTweets"))
             .build();
-        
-        Map<String,Object> context = new HashMap<String,Object>();
-        context.put("persons", persons);
-        context.put("twitter", twitter);
+
+        Map<String,Object> context = getMockContext();
         Collection<Map> result = query.execute(context);
         
         assertEquals(2, result.size());
@@ -56,9 +51,6 @@ public class JoinTest extends Assert {
 
     @Test
     public void findTotalTweetsWithWhere() throws Exception {
-        List<Person> persons = getPersons();
-        
-        Twitter twitter = getMockTwitter();
         Query query = new QueryBuilder()
             .from("persons")
             .as("p")
@@ -69,9 +61,7 @@ public class JoinTest extends Assert {
                         .set("tweets", "twitterInfo.totalTweets"))
             .build();
         
-        Map<String,Object> context = new HashMap<String,Object>();
-        context.put("persons", persons);
-        context.put("twitter", twitter);
+        Map<String,Object> context = getMockContext();
         Collection<Map> result = query.execute(context);
         
         assertEquals(1, result.size());
@@ -86,12 +76,7 @@ public class JoinTest extends Assert {
 
     @Test
     public void testQueryText() throws Exception {
-        List<Person> persons = getPersons();
-        Twitter twitter = getMockTwitter();
-        
-        Map<String,Object> context = new HashMap<String,Object>();
-        context.put("persons", persons);
-        context.put("twitter", twitter);
+        Map<String, Object> context = getMockContext();
         
         Collection<Map> result = Query.execute(
             "from persons as p join twitter.getUserInfo(p.twitterId) as twitterInfo where twitterInfo.totalTweets < 5" +
@@ -105,6 +90,56 @@ public class JoinTest extends Assert {
         assertEquals(2, newPerson.size());
         assertEquals("Joe Schmoe", newPerson.get("name"));
         assertEquals(4, newPerson.get("tweets"));
+    }
+
+    @Test
+    public void joinOnNonNullVariable() throws Exception {
+        List<Person> persons = new ArrayList<Person>();
+        
+        persons.add(new Person("Joe", "Schmoe", "Sales", 10000, "joeschmoe"));
+        persons.add(new Person("Jane", "Schmoe", "Sales", 12000, null));
+
+        Twitter twitter = getMockTwitter();
+        
+        Map<String,Object> context = new HashMap<String,Object>();
+        context.put("persons", persons);
+        context.put("twitter", twitter);
+        
+        Collection<Map> result = Query.execute(
+            "from persons as p join twitter.getUserInfo(p.twitterId) as twitterInfo on p.twitterId " +
+            "select new { name = p.firstName + ' ' + p.lastName, tweets = twitterInfo.totalTweets }", 
+            context);
+        
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void asyncQueryLang() throws Exception {
+        Map<String, Object> context = getMockContext();
+        
+        Collection<Map> result = Query.execute(
+            "from persons as p join twitter.getUserInfo(p.twitterId) as twitterInfo async where twitterInfo.totalTweets < 5" +
+            "select new { name = p.firstName + ' ' + p.lastName, tweets = twitterInfo.totalTweets }", 
+            context);
+        
+        assertEquals(1, result.size());
+        
+        result = Query.execute(
+           "from persons as p join twitter.getUserInfo(p.twitterId) as twitterInfo async(5) where twitterInfo.totalTweets < 5" +
+           "select new { name = p.firstName + ' ' + p.lastName, tweets = twitterInfo.totalTweets }", 
+           context);
+       
+       assertEquals(1, result.size());
+    }
+
+    protected Map<String, Object> getMockContext() {
+        List<Person> persons = getPersons();
+        Twitter twitter = getMockTwitter();
+        
+        Map<String,Object> context = new HashMap<String,Object>();
+        context.put("persons", persons);
+        context.put("twitter", twitter);
+        return context;
     }
 
     protected Twitter getMockTwitter() {
@@ -133,8 +168,6 @@ public class JoinTest extends Assert {
 
     @Test
     public void asyncJoin() throws Exception {
-        List<Person> persons = getPersons();
-        
         Executor executor = new Executor() {
             
             public void execute(Runnable command) {
@@ -143,7 +176,6 @@ public class JoinTest extends Assert {
             }
         };
         
-        Twitter twitter = getMockTwitter();
         Query query = new QueryBuilder()
             .from("persons")
             .as("p")
@@ -153,10 +185,8 @@ public class JoinTest extends Assert {
                         .set("name", "p.firstName + \" \" + p.lastName")
                         .set("tweets", "twitterInfo.totalTweets"))
             .build();
-        
-        Map<String,Object> context = new HashMap<String,Object>();
-        context.put("persons", persons);
-        context.put("twitter", twitter);
+
+        Map<String,Object> context = getMockContext();
         Collection<Map> result = query.execute(context);
         
         assertEquals(2, executionCount);
