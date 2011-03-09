@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.Predicate;
-import org.mvel.MVEL;
+import org.mvel2.MVEL;
 
 public class WherePredicate implements Predicate {
     private final QueryBuilder queryBuilder;

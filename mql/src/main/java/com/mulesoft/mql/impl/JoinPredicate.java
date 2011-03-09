@@ -16,7 +16,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.apache.commons.collections.Predicate;
-import org.mvel.MVEL;
+import org.mvel2.MVEL;
 
 public class JoinPredicate implements Predicate {
 

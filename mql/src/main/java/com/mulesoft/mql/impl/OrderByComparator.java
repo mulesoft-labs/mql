@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Map;
 
-import org.mvel.MVEL;
+import org.mvel2.MVEL;
 
 public class OrderByComparator implements Comparator<Map<String,Object>> {
 

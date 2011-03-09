@@ -36,17 +36,19 @@ public class JoinTest extends Assert {
         Collection<Map> result = query.execute(context);
         
         assertEquals(2, result.size());
-
-        Iterator<Map> itr = result.iterator();
-        Map newPerson = itr.next();
-        assertEquals(2, newPerson.size());
-        assertEquals("Joe Schmoe", newPerson.get("name"));
-        assertEquals(4, newPerson.get("tweets"));
-
-        newPerson = itr.next();
-        assertEquals(2, newPerson.size());
-        assertEquals("Jane Schmoe", newPerson.get("name"));
-        assertEquals(5, newPerson.get("tweets"));
+        for (Map newPerson : result) {
+            if (newPerson.get("name").equals("Joe Schmoe")) {
+                assertEquals(2, newPerson.size());
+                assertEquals("Joe Schmoe", newPerson.get("name"));
+                assertEquals(4, newPerson.get("tweets"));
+            } else if (newPerson.get("name").equals("Jane Schmoe")) {
+                assertEquals(2, newPerson.size());
+                assertEquals("Jane Schmoe", newPerson.get("name"));
+                assertEquals(5, newPerson.get("tweets"));
+            } else {
+                fail("Did not find correct results");
+            }
+        }
     }
 
     @Test

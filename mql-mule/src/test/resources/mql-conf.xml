@@ -38,7 +38,7 @@
         </message-properties-transformer>
         <mql:transform 
             query="select new { 
-                    totalTweets = message.getInvocationProperty('mockTotalTweets')
+                    totalTweets = mockTotalTweets
                    }" />
     </flow>
 </mule>

@@ -30,7 +30,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.functors.AndPredicate;
 import org.apache.commons.collections.functors.TruePredicate;
-import org.mvel.MVEL;
+import org.mvel2.MVEL;
 
 public class Query {
 
@@ -112,7 +112,7 @@ public class Query {
         return execute(context);
     }
     
-    public <T> T execute(Map<String,Object> context) {
+    public <T> T execute(final Map<String,Object> context) {
         Collection<?> items;
         String fromObjectName = queryBuilder.getFrom();
         if (fromObjectName == null) {
@@ -136,7 +136,16 @@ public class Query {
             if (o == null) {
                 throw new IllegalStateException("null items are not allowed in the list of queryable objects.");
             }
-            Map<String, Object> vars = new HashMap<String,Object>();
+            
+            Map<String, Object> vars = new LazyResolvingContext() {
+                @Override
+                // If a variable doesn't exist, try loading it from the context
+                // the user passed in, since it might be lazy loading.
+                public Object load(String key) {
+                    return context.get(key);
+                }
+            };
+            
             vars.putAll(context);
             vars.put(queryBuilder.getAs(), o);
             itemsAsMaps.add(vars);

@@ -22,8 +22,8 @@ public class QueryTest extends Assert {
             .max(3)
             .where(eq(property("division"), "Sales"))
             .select(new ObjectBuilder() 
-                      .set("name", "p.firstName + \" \" p.lastName")
-                      .set("income", "p.income")).build();
+                      .set("name", "firstName + ' ' + lastName")
+                      .set("income", "income")).build();
         
         Collection<Map> result = query.execute(persons);
         assertEquals(3, result.size());
