@@ -30,9 +30,17 @@ The query syntax is best illustrated by example queries below.
 Filtering Collections:
 
 	from people where division = 'Sales'
-	from people as p where p.division = 'Sales' 
-	from people as p where p.division = 'Sales' and p.firstName = 'Dan'
+	from people as p where p.division = 'Sales' // explicit syntax
+	from people where division = 'Sales' and (firstName = 'Dan' or firstName = 'Joe')
+	from people where division = 'Sales' 
 
+Querying objects in your query context:
+   
+    // execute the getPeople() method on the salesforce object
+    from salesforce.people as p where p.lastName = 'Diephouse'
+    // the more explicit syntax is also valid
+    from salesforce.getPeople() as p where p.lastName = 'Diephouse'
+    
 Ordering collections:
 
 	from people as p order by name

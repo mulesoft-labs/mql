@@ -170,7 +170,7 @@ Ignored Tokens
 Productions
   /* Basic query structure */
   query = {select_only} select_statement |
-          {full} from [fromvar]:identifier as_statement? join_statement? where_statement? select_statement?;
+          {full} from [fromvar]:mvel_expression as_statement? join_statement? where_statement? select_statement?;
 
   join_statement = {join} join [joinexpression]:mvel_expression [joinas]:as [asvar]:identifier on_statement? async_statement?;
   as_statement = as [asvar]:identifier;

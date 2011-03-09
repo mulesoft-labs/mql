@@ -40,7 +40,7 @@ public class MqlInterpreter extends DepthFirstAdapter {
     @Override
     public void caseAFullQuery(AFullQuery node) {
         queryBuilder = new QueryBuilder();
-        queryBuilder.from(node.getFromvar().getText());
+        queryBuilder.from(parseSpaces(node.getFromvar().toString()));
 
         super.caseAFullQuery(node);
         

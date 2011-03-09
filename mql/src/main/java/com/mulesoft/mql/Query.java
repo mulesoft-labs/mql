@@ -41,6 +41,7 @@ public class Query {
     private Predicate wherePredicate;
     private JoinBuilder joinBuilder;
     private String defaultFromObject = "items";
+    private Serializable compiledFromExpression;
 
     public Query(QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
@@ -114,12 +115,7 @@ public class Query {
     
     public <T> T execute(final Map<String,Object> context) {
         Collection<?> items;
-        String fromObjectName = queryBuilder.getFrom();
-        if (fromObjectName == null) {
-            fromObjectName = getDefaultSelectObject();
-        }
-        
-        Object from = context.get(fromObjectName);
+        Object from = getFrom(context);
         boolean selectSingleObject = false;
         
         if (from instanceof Collection) {
@@ -162,6 +158,18 @@ public class Query {
         }
         
         return (T) resultList;
+    }
+
+    protected Object getFrom(final Map<String, Object> context) {
+        if (compiledFromExpression == null) {
+            String fromObjectName = queryBuilder.getFrom();
+            if (fromObjectName == null) {
+                fromObjectName = getDefaultSelectObject();
+            }
+
+            compiledFromExpression = MVEL.compileExpression(fromObjectName);
+        }
+        return MVEL.executeExpression(compiledFromExpression, context);
     }
 
     protected void order(ArrayList resultList) {

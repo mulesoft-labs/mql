@@ -108,8 +108,18 @@ public class ParserTest extends Assert {
         
         assertEquals(5, result.size());
     }
+
+    @Test 
+    public void testSelectFromObjectMethod() {
+        Map<String, Object> context = asMap("test", this);
+        
+        Collection<Map> result = 
+            Query.execute("from test.persons as p where p.division = 'Sales'", context);
+        
+        assertEquals(3, result.size());
+    }
     
-    private List<Person> getPersons() {
+    public List<Person> getPersons() {
         List<Person> persons = new ArrayList<Person>();
         
         persons.add(new Person("Joe", "Schmoe", "Sales", 10000));
