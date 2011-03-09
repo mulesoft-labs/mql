@@ -70,7 +70,7 @@ Joining a data source:
    from people as p 
      join twitter.getUserInfo(p.twitterId) as twitterInfo
      select new {
-       name = firstName + ' ' + lastName,
+       name = p.firstName + ' ' + p.lastName,
        tweets = twitterInfo.totalTweets
      }
 
@@ -78,6 +78,22 @@ This query assumes that you have an object named "twitter" inside your
 query context which has a method called getUserInfo() which takes a twitter 
 user id. It then joins the result of this method call into a new object 
 called "twitterInfo" which can be used in the select statement.
+
+If you do a join, they happen asynchronously via an Executor. You can specify 
+the number of threads you wish to use to do the join (i.e. the number of rows 
+you want to process simultaneously) via the async keyword. E.g. this will use
+10 threads to do the join:
+
+    from people as p
+       join twitter.getUserInfo(p.twitterId) as twitterInfo async(10) ...       
+
+You can also control when the join happens via the on keyword:
+
+    from people as p
+       join twitter.getUserInfo(p.twitterId) as twitterInfo on p.twitterId ...       
+
+This will ensure the join happens only when there is a twitterId property 
+on the person.
 
 Using MQL in Mule
 =================
@@ -180,7 +196,7 @@ Spring ApplicationContext. You can implement a SpringQueryContext like this:
 	            return applicationContext.getBean(key);
 	        }
 	        return null;
-	    }    
+	    }
 	}
 
 (NOTE: this file is included in the com.mulesoft.mql.spring package)
