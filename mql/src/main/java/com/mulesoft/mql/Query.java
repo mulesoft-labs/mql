@@ -168,7 +168,7 @@ public class Query {
                 throw new IllegalStateException("null items are not allowed in the list of queryable objects.");
             }
             
-            Map<String, Object> vars = new LazyResolvingContext() {
+            Map<String, Object> vars = new LazyQueryContext() {
                 @Override
                 // If a variable doesn't exist, try loading it from the context
                 // the user passed in, since it might be lazy loading.

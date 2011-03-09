@@ -7,7 +7,7 @@ import org.mule.api.transport.PropertyScope;
 import org.mule.client.DefaultLocalMuleClient;
 import org.mule.transformer.AbstractMessageTransformer;
 
-import com.mulesoft.mql.LazyResolvingContext;
+import com.mulesoft.mql.LazyQueryContext;
 import com.mulesoft.mql.Query;
 
 import java.util.Map;
@@ -29,7 +29,7 @@ public class MqlTransformer extends AbstractMessageTransformer {
     }
 
     public Object transformMessage(final MuleMessage message, String outputEncoding) throws TransformerException {
-        Map<String,Object> context = new MuleMessageContext(message);
+        Map<String,Object> context = new MuleMessageQueryContext(message);
         context.put("payload", message.getPayload());
         context.put("message", message);
         context.put("mule", clientWrapper);
@@ -41,10 +41,10 @@ public class MqlTransformer extends AbstractMessageTransformer {
         this.query = query;
     }
 
-    public class MuleMessageContext extends LazyResolvingContext {
+    public class MuleMessageQueryContext extends LazyQueryContext {
         private final MuleMessage message;
 
-        public MuleMessageContext(MuleMessage message) {
+        public MuleMessageQueryContext(MuleMessage message) {
             this.message = message;
         }
 
