@@ -98,6 +98,16 @@ public class ParserTest extends Assert {
         assertEquals("Joe Schmoe", newItem.get("name"));
         assertEquals("Sales", newItem.get("division"));
     }
+
+    @Test 
+    public void testSelectOnly() {
+        List<Person> persons = getPersons();
+        
+        Collection<Map> result = 
+            Query.execute("select new { name = firstName + \' \' + lastName }", persons);
+        
+        assertEquals(5, result.size());
+    }
     
     private List<Person> getPersons() {
         List<Person> persons = new ArrayList<Person>();

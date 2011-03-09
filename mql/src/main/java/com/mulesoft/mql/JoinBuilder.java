@@ -18,7 +18,7 @@ public class JoinBuilder {
     private String expression;
     private String as;
     private String on;
-    private boolean async;
+    private boolean async = true;
     private int threads = 10;
     private Executor executor;
     
@@ -64,11 +64,20 @@ public class JoinBuilder {
         return this;
     }
 
+    public JoinBuilder sync() {
+        this.async = false;
+        return this;
+    }
+
     public int getThreads() {
         return threads;
     }
 
     public JoinBuilder threads(int threads) {
+        if (threads < 1) {
+            throw new IllegalArgumentException("Thread count for an async join can not be less than one.");
+        }
+        
         this.threads = threads;
         return this;
     }

@@ -4,22 +4,70 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.mule.api.MuleMessage;
+import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.transformer.TransformerException;
+import org.mule.api.transport.PropertyScope;
+import org.mule.client.DefaultLocalMuleClient;
 import org.mule.transformer.AbstractMessageTransformer;
 
 import com.mulesoft.mql.Query;
 
 public class MqlTransformer extends AbstractMessageTransformer {
     private String query;
+    private MuleClientWrapper clientWrapper;
+    private Query compiledQuery;
+    
+    
+    @Override
+    public void initialise() throws InitialisationException {
+        super.initialise();
+        
+        clientWrapper = new MuleClientWrapper(new DefaultLocalMuleClient(muleContext));
+        compiledQuery = Query.create(query);
+        compiledQuery.setDefaultSelectObject("payload");
+    }
 
-    public Object transformMessage(MuleMessage message, String outputEncoding) throws TransformerException {
-        Map<String,Object> context = new HashMap<String,Object>();
+    public Object transformMessage(final MuleMessage message, String outputEncoding) throws TransformerException {
+        Map<String,Object> context = new HashMap<String,Object>() {
+
+            @Override
+            public boolean containsKey(Object key) {
+                return super.containsKey(key);
+            }
+
+            @Override
+            public Object get(Object key) {
+                Object object = super.get(key);
+                String keyString = key.toString();
+                if (object == null) {
+                    object = message.getProperty(keyString, PropertyScope.OUTBOUND);
+                    put(keyString, object);
+                }
+
+                if (object == null) {
+                    object = message.getProperty(keyString, PropertyScope.INVOCATION);
+                    put(keyString, object);
+                }
+
+                if (object == null) {
+                    object = message.getProperty(keyString, PropertyScope.INBOUND);
+                    put(keyString, object);
+                }
+
+                if (object == null) {
+                    object = muleContext.getRegistry().lookupObject(keyString);
+                    put(keyString, object);
+                }
+                
+                return object;
+            }
+            
+        };
         context.put("payload", message.getPayload());
         context.put("message", message);
-        
-        // TODO: make properties available as a hashmap
-        
-        return Query.execute(query, context);
+        context.put("mule", clientWrapper);
+
+        return compiledQuery.execute(context);
     }
 
     public void setQuery(String query) {

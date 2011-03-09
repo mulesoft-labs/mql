@@ -5,7 +5,7 @@ import java.util.concurrent.Executor;
 
 public class QueryBuilder {
     
-    protected String from = "items";
+    protected String from;
     protected String as = "item";
     protected String orderBy;
     protected int max = Integer.MAX_VALUE;

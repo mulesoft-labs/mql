@@ -118,14 +118,18 @@ public class JoinTest extends Assert {
         Map<String, Object> context = getMockContext();
         
         Collection<Map> result = Query.execute(
-            "from persons as p join twitter.getUserInfo(p.twitterId) as twitterInfo async where twitterInfo.totalTweets < 5" +
+            "from persons as p " +
+            "join twitter.getUserInfo(p.twitterId) as twitterInfo async " +
+            "where twitterInfo.totalTweets < 5" +
             "select new { name = p.firstName + ' ' + p.lastName, tweets = twitterInfo.totalTweets }", 
             context);
         
         assertEquals(1, result.size());
         
         result = Query.execute(
-           "from persons as p join twitter.getUserInfo(p.twitterId) as twitterInfo async(5) where twitterInfo.totalTweets < 5" +
+           "from persons as p " +
+           "join twitter.getUserInfo(p.twitterId) as twitterInfo async(5) " +
+           "where twitterInfo.totalTweets < 5" +
            "select new { name = p.firstName + ' ' + p.lastName, tweets = twitterInfo.totalTweets }", 
            context);
        

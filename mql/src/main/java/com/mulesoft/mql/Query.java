@@ -40,6 +40,7 @@ public class Query {
     private Predicate joinPredicate;
     private Predicate wherePredicate;
     private JoinBuilder joinBuilder;
+    private String defaultFromObject = "items";
 
     public Query(QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
@@ -77,6 +78,11 @@ public class Query {
             throw new QueryException(e);
         }
     }
+    
+    public static <T> T execute(String queryString, Collection<?> items) {
+        return create(queryString).execute(items);
+    }
+    
     public static <T> T execute(String queryString, Map<String,Object> context) {
         return create(queryString).execute(context);
     }
@@ -90,7 +96,7 @@ public class Query {
      * @return
      */
     public <T> T execute(Collection<?> items) {
-        return execute(items, "items");
+        return execute(items, getDefaultSelectObject());
     }
     
     /**
@@ -108,7 +114,12 @@ public class Query {
     
     public <T> T execute(Map<String,Object> context) {
         Collection<?> items;
-        Object from = context.get(queryBuilder.getFrom());
+        String fromObjectName = queryBuilder.getFrom();
+        if (fromObjectName == null) {
+            fromObjectName = getDefaultSelectObject();
+        }
+        
+        Object from = context.get(fromObjectName);
         boolean selectSingleObject = false;
         
         if (from instanceof Collection) {
@@ -154,7 +165,7 @@ public class Query {
     protected void joinAndFilter(List<Map<String, Object>> itemsAsMaps, ArrayList resultList) {
         Predicate predicate = AndPredicate.getInstance(joinPredicate, wherePredicate);
         
-        if (joinBuilder != null && joinBuilder.isAsync()) {
+        if (joinBuilder != null && joinBuilder.isAsync() && itemsAsMaps.size() > 1) {
             doAsyncJoinAndFilter(itemsAsMaps, resultList, predicate);
         } else {
             doSyncJoinAndFilter(itemsAsMaps, resultList, predicate);
@@ -261,7 +272,7 @@ public class Query {
         Map<String, Object> t = new HashMap<String,Object>();
         
         for (Map.Entry<String,Serializable> e : compiledExpressions.entrySet()) {
-            t.put(e.getKey(), MVEL.executeExpression(e.getValue(), vars));
+            t.put(e.getKey(), MVEL.executeExpression(e.getValue(), vars.get(queryBuilder.getAs()), vars));
         }
         return t;
     }
@@ -277,6 +288,19 @@ public class Query {
             builder.append(" where ").append(queryBuilder.getRestriction());
         }
         return builder.toString();
+    }
+
+    public String getDefaultSelectObject() {
+        return defaultFromObject;
+    }
+
+    /**
+     * Set the object name that is used by default for a select only query. That is,
+     * if there is no 'from foo as f' clause, set the from object name.
+     * @param defaultFromObject
+     */
+    public void setDefaultSelectObject(String defaultFromObject) {
+        this.defaultFromObject = defaultFromObject;
     }
 
     private final class JoinAndFilterRunnable implements Runnable {

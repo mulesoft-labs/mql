@@ -11,11 +11,35 @@
                http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/3.1/mule-http.xsd
                ">
 
-    <flow name="mql">
-        <inbound-endpoint address="vm://test"
+    <flow name="select">
+        <inbound-endpoint address="vm://select"
             exchange-pattern="request-response" />
-        <mql:transform query="from payload as p select new { name = p.firstName }" />
+        <mql:transform query="from payload as p select new { name = p.firstName + ' ' + p.lastName }" />
     </flow>
 
+    <flow name="join">
+        <inbound-endpoint address="vm://join"
+            exchange-pattern="request-response" />
+        <mql:transform 
+            query="from payload as p 
+                     join mule.send('vm://twitter', p.twitterId) as twitterInfo
+                     select new { 
+                        name = firstName + ' ' + lastName, 
+                        tweets = twitterInfo.totalTweets 
+                     }" />
+    </flow>
+    
+
+    <flow name="twitter">
+        <inbound-endpoint address="vm://twitter"
+            exchange-pattern="request-response" />
+        <message-properties-transformer scope="invocation">
+            <add-message-property key="mockTotalTweets" value="1000"/>
+        </message-properties-transformer>
+        <mql:transform 
+            query="select new { 
+                    totalTweets = message.getInvocationProperty('mockTotalTweets')
+                   }" />
+    </flow>
 </mule>
 

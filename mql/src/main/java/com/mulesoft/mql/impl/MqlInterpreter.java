@@ -1,9 +1,9 @@
 package com.mulesoft.mql.impl;
 
+import static com.mulesoft.mql.JoinBuilder.expression;
 import static com.mulesoft.mql.ObjectBuilder.newObject;
 import static com.mulesoft.mql.Restriction.and;
 import static com.mulesoft.mql.Restriction.or;
-import static com.mulesoft.mql.JoinBuilder.*;
 
 import com.mulesoft.mql.JoinBuilder;
 import com.mulesoft.mql.ObjectBuilder;
@@ -12,15 +12,17 @@ import com.mulesoft.mql.QueryBuilder;
 import com.mulesoft.mql.Restriction;
 import com.mulesoft.mql.grammar.analysis.DepthFirstAdapter;
 import com.mulesoft.mql.grammar.node.AAndWhereExpression;
+import com.mulesoft.mql.grammar.node.AAsStatement;
 import com.mulesoft.mql.grammar.node.AAsyncStatement;
 import com.mulesoft.mql.grammar.node.AEqualsComparator;
+import com.mulesoft.mql.grammar.node.AFullQuery;
 import com.mulesoft.mql.grammar.node.AJoinJoinStatement;
 import com.mulesoft.mql.grammar.node.ALtComparator;
 import com.mulesoft.mql.grammar.node.AOnStatement;
 import com.mulesoft.mql.grammar.node.AOrWhereExpression;
-import com.mulesoft.mql.grammar.node.AQuery;
 import com.mulesoft.mql.grammar.node.ASelectNewItem;
 import com.mulesoft.mql.grammar.node.ASelectNewItemProperty;
+import com.mulesoft.mql.grammar.node.ASelectOnlyQuery;
 import com.mulesoft.mql.grammar.node.AThreadStatement;
 import com.mulesoft.mql.grammar.node.AVariableWhereSide;
 import com.mulesoft.mql.grammar.node.AWhereClause;
@@ -36,12 +38,11 @@ public class MqlInterpreter extends DepthFirstAdapter {
     private JoinBuilder join;
 
     @Override
-    public void caseAQuery(AQuery node) {
+    public void caseAFullQuery(AFullQuery node) {
         queryBuilder = new QueryBuilder();
         queryBuilder.from(node.getFromvar().getText());
-        queryBuilder.as(node.getAsvar().getText());
-                   
-        super.caseAQuery(node);
+
+        super.caseAFullQuery(node);
         
         if (restrictions.size() == 1) {
             queryBuilder.where(restrictions.pop());
@@ -49,6 +50,19 @@ public class MqlInterpreter extends DepthFirstAdapter {
             throw new IllegalStateException("Too many restrictions!");
         }
     }
+
+    @Override
+    public void caseAAsStatement(AAsStatement node) {
+        queryBuilder.as(node.getAsvar().getText());
+        super.caseAAsStatement(node);
+    }
+
+    @Override
+    public void caseASelectOnlyQuery(ASelectOnlyQuery node) {
+        queryBuilder = new QueryBuilder();
+        super.caseASelectOnlyQuery(node);
+    }
+
 
     @Override
     public void inAJoinJoinStatement(AJoinJoinStatement node) {
