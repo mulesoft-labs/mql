@@ -32,8 +32,34 @@ import org.apache.commons.collections.functors.AndPredicate;
 import org.apache.commons.collections.functors.TruePredicate;
 import org.mvel2.MVEL;
 
+/**
+ * The central place for interfacing with MQL. To use, it is recommended that you 
+ * compile your queries, save them, and then execute them. For instance:
+ * <pre>
+ * 
+ *
+ *  // populate some data
+ *  List<Person> persons = new ArrayList<Person>();
+ *  persons.add(new Person("Dan", "Diephouse", "MuleSoft", "Engineering"));
+ *  persons.add(new Person("Joe", "Sales", "MuleSoft", "Sales"));
+ *  
+ *  // create a context for the query
+ *  Map<String,Object> context = new HashMap<String,Object>();
+ *  context.put("persons", persons);
+ *  
+ *  // store this query and reuse it
+ *  Query query = Query.compile("from people where division = 'Engineering'");
+ *  
+ *  // execute the query
+ *  Collection<Person> result = 
+ *      query.execute("from people where division = 'Engineering'", context);
+ * </pre>
+ * Of course there is a handy shortcut method too:
+ * <pre>
+ * Query.execute("from people where division = 'Engineering'", persons);
+ * </pre>
+ */
 public class Query {
-
 
     private final QueryBuilder queryBuilder;
     private Map<String,Serializable> compiledExpressions = new HashMap<String,Serializable>();
@@ -59,6 +85,9 @@ public class Query {
         wherePredicate = getWhere();
     }
 
+    /**
+     * Create a compiled Query object which can be used to repeatedly query.
+     */
     public static Query create(String queryString) {
         Lexer lexer = new Lexer(new PushbackReader(new StringReader(queryString)));
         Parser parser = new Parser(lexer);
@@ -80,10 +109,16 @@ public class Query {
         }
     }
     
+    /**
+     * A short cut for Query.create(queryString).execute(items);
+     */
     public static <T> T execute(String queryString, Collection<?> items) {
         return create(queryString).execute(items);
     }
     
+    /**
+     * A short cut for Query.create(queryString).execute(context);
+     */
     public static <T> T execute(String queryString, Map<String,Object> context) {
         return create(queryString).execute(context);
     }
