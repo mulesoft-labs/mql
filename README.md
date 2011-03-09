@@ -158,3 +158,57 @@ mule query context variable and the send method.
                         tweets = twitterInfo.totalTweets 
                      }" />
     </flow>
+
+Implementing a custom Query Context
+=================================
+If you have other data sources that you want to be able to join from, use in
+your where query, or in your select statement, you can support these by 
+implementing a LazyQueryContext. E.g., you may want to query beans in your
+Spring ApplicationContext. You can implement a SpringQueryContext like this:
+
+	public class SpringQueryContext extends LazyQueryContext {
+	    private ApplicationContext applicationContext;
+	
+	    public SpringQueryContext(ApplicationContext applicationContext) {
+	        super();
+	        this.applicationContext = applicationContext;
+	    }
+	
+	    @Override
+	    public Object load(String key) {
+	        if (applicationContext.containsBean(key)) {
+	            return applicationContext.getBean(key);
+	        }
+	        return null;
+	    }    
+	}
+
+(NOTE: this file is included in the com.mulesoft.mql.spring package)
+
+Let's say that you have a bean defined in your Spring context like this:
+
+    <bean id="personDao" class="....PersonDAOImpl"/>
+    
+Now you can write queries against it:
+
+	// create a context for the query
+	ApplicationContext applicationContext = ...; // inject via ApplicationContextAware
+	Map<String,Object> queryContext = new SpringQueryContext(applicationContext);
+	
+	// execute the query
+	Collection<Person> result = 
+	    Query.execute("from personDao.persons where division = 'Engineering'", queryContext);
+	  
+This will call getPeople() on your personManager bean. 
+
+You could also use it to join data across different beans. E.g., this query
+joins a list of divisions inside a company with a list of people in each
+division.
+  
+    from divisionDao as division 
+      join personDao.getPersonsForDivision(division.id) as peopleInDivision
+	  select new {
+	     name = division.name,
+	     people = peopleInDivision
+	  }
+	  
