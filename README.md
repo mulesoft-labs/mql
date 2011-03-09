@@ -104,4 +104,37 @@ Here is a very simple flow:
 	    </flow>
 	
 	</mule>
-	
+
+You can also join data from cloud connectors or other beans inside your Mule 
+configuration file. For example, let's say you define a twitter cloud connector:
+
+(WARNING: I haven't verified this syntax for this connector, but the idea
+itself is sound and should work)
+
+    <twitter:config name="twitter" ... />
+    
+You can then join it in using the bean name:
+
+    <mql:transform 
+        query="from payload as p 
+                 join twitter.getUserInfo(p.twitterId) as twitterInfo
+                 select new { 
+                    name = firstName + ' ' + lastName, 
+                    tweets = twitterInfo.totalTweets 
+                 }" />
+
+You can also join data from other endpoints. For example, if you had an endpoint on
+vm://twitter which retreived information about a user, you could join it in via the 
+mule query context variable and the send method.	
+
+    <flow name="join">
+        <inbound-endpoint address="vm://join"
+            exchange-pattern="request-response" />
+        <mql:transform 
+            query="from payload as p 
+                     join mule.send('vm://twitter', p.twitterId) as twitterInfo
+                     select new { 
+                        name = firstName + ' ' + lastName, 
+                        tweets = twitterInfo.totalTweets 
+                     }" />
+    </flow>

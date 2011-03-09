@@ -18,7 +18,6 @@ public class MqlTransformer extends AbstractMessageTransformer {
     private MuleClientWrapper clientWrapper;
     private Query compiledQuery;
     
-    
     @Override
     public void initialise() throws InitialisationException {
         super.initialise();
