@@ -99,11 +99,31 @@ Here is a very simple flow:
 	    <flow name="mql">
 	        <inbound-endpoint address="vm://select"
 	            exchange-pattern="request-response" />
-	        <mql:transform query="from payload as p where division = 'Sales'
+	        <mql:transform query="from payload where division = 'Sales'
 	                                select new { name = firstName + ' ' + lastName }" />
 	    </flow>
 	
 	</mule>
+
+If you want, you can refer to properties inside the Mule Message inside the 
+where or select statements. In this example, the property 'someData' is 
+added to the message and then added to the 'data' field of the object that
+is created via the select statement.
+
+    <flow name="selectDataFromMessageProperty">
+        <inbound-endpoint address="vm://join"
+            exchange-pattern="request-response" 
+        <message-properties-transformer scope="invocation">
+            <add-message-property key="someData" value="1000"/>
+        </message-properties-transformer>/>
+        <mql:transform 
+            query="from payload
+                     join mule.send('vm://twitter', p.twitterId) as twitterInfo
+                     select new { 
+                        name = firstName + ' ' + lastName, 
+                        data = someData 
+                     }" />
+    </flow>
 
 You can also join data from cloud connectors or other beans inside your Mule 
 configuration file. For example, let's say you define a twitter cloud connector:
