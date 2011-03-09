@@ -182,9 +182,8 @@ public class Query {
             itemsAsMaps.add(vars);
         }
         
-        ArrayList resultList = new ArrayList();
-
-        joinAndFilter(itemsAsMaps, resultList);
+        List resultList = new ArrayList();
+        resultList = joinAndFilter(itemsAsMaps, resultList);
         order(resultList);
         resultList = doSelect(resultList);
         
@@ -207,24 +206,25 @@ public class Query {
         return MVEL.executeExpression(compiledFromExpression, context);
     }
 
-    protected void order(ArrayList resultList) {
+    protected void order(List resultList) {
         // order the items 
         if (queryBuilder.getOrderBy() != null) {
             Collections.sort(resultList, new OrderByComparator(queryBuilder));
         }
     }
 
-    protected void joinAndFilter(List<Map<String, Object>> itemsAsMaps, ArrayList resultList) {
+    protected List joinAndFilter(List<Map<String, Object>> itemsAsMaps, List resultList) {
         Predicate predicate = AndPredicate.getInstance(joinPredicate, wherePredicate);
         
         if (joinBuilder != null && joinBuilder.isAsync() && itemsAsMaps.size() > 1) {
-            doAsyncJoinAndFilter(itemsAsMaps, resultList, predicate);
+            return doAsyncJoinAndFilter(itemsAsMaps, resultList, predicate);
         } else {
             doSyncJoinAndFilter(itemsAsMaps, resultList, predicate);
+            return resultList;
         }
     }
 
-    protected void doSyncJoinAndFilter(List<Map<String, Object>> itemsAsMaps, ArrayList resultList, Predicate predicate) {
+    protected void doSyncJoinAndFilter(List<Map<String, Object>> itemsAsMaps, List resultList, Predicate predicate) {
         for (int i = 0; i < itemsAsMaps.size() && i < queryBuilder.getMax(); i++) {
             Map<String, Object> object = itemsAsMaps.get(i);
             if (predicate.evaluate(object)) {
@@ -233,8 +233,8 @@ public class Query {
         }
     }
 
-    protected void doAsyncJoinAndFilter(final List<Map<String, Object>> itemsAsMaps, 
-                                        final ArrayList resultList, 
+    protected List doAsyncJoinAndFilter(final List<Map<String, Object>> itemsAsMaps, 
+                                        final List resultList, 
                                         final Predicate predicate) {
         Executor executor = joinBuilder.getExecutor();
 
@@ -243,8 +243,7 @@ public class Query {
         CountDownLatch latch = new CountDownLatch(itemsAsMaps.size());
         for (int i = 0; i < itemsAsMaps.size(); i++) {
             Map<String, Object> object = itemsAsMaps.get(i);
-            Runnable joiner = new JoinAndFilterRunnable(object, predicate, resultList, syncedList, latch);
-            executor.execute(joiner);
+            executor.execute(new JoinAndFilterRunnable(object, predicate, syncedList, latch));
         }
         
         try {
@@ -255,9 +254,10 @@ public class Query {
         for (int i = resultList.size(); i >= queryBuilder.getMax(); i--) {
             resultList.remove(queryBuilder.getMax());
         }
+        return resultList;
     }
 
-    protected ArrayList doSelect(ArrayList list) {
+    protected List doSelect(List list) {
         // transform the items
         ObjectBuilder select = queryBuilder.getSelect();
         if (select != null) {
@@ -357,19 +357,16 @@ public class Query {
 
     private final class JoinAndFilterRunnable implements Runnable {
         private final Predicate predicate;
-        private final ArrayList resultList;
         private final Map<String, Object> object;
         private final List syncedList;
         private final CountDownLatch latch;
 
         private JoinAndFilterRunnable(Map<String, Object> object, 
                                       Predicate predicate, 
-                                      ArrayList resultList,
                                       List syncedList, 
                                       CountDownLatch latch) {
             this.object = object;
             this.predicate = predicate;
-            this.resultList = resultList;
             this.syncedList = syncedList;
             this.latch = latch;
         }
@@ -381,7 +378,7 @@ public class Query {
                 }
                 
                 if (predicate.evaluate(object)) {
-                    resultList.add(object);
+                    syncedList.add(object);
                 }
             } finally {
                 latch.countDown();

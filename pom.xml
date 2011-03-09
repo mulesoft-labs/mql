@@ -4,7 +4,7 @@
     <groupId>com.mulesoft.mql</groupId>
     <artifactId>mql-parent</artifactId>
     <name>Mashup Query Language Parent</name>
-    <version>0.1-SNAPSHOT</version> 
+    <version>0.2-SNAPSHOT</version> 
     <packaging>pom</packaging>  
     <modules>
         <module>mql</module>
@@ -22,4 +22,17 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>muleforge.webdav.releases</id>
+            <name>MuleSoft Release Repository</name>
+            <url>dav:https://repository.muleforge.org/release/</url>
+        </repository>
+        <snapshotRepository>
+            <id>muleforge.webdav.snapshots</id>
+            <name>MuleSoft Snapshot Repository</name>
+            <url>dav:https://repository.muleforge.org/snapshot/</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

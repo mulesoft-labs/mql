@@ -4,26 +4,26 @@
     <parent>
         <groupId>com.mulesoft.mql</groupId>
         <artifactId>mql-parent</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>mql-mule</artifactId>
 
     <name>Mashup Query Language for Mule</name>
     <properties>
-        <muleVersion>3.1.0</muleVersion>
+        <muleVersion>3.1.1</muleVersion>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.mulesoft.mql</groupId>
             <artifactId>mql</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${version}</version>
         </dependency>
         <dependency>
             <groupId>com.mulesoft.mql</groupId>
             <artifactId>mql</artifactId>
-            <version>0.1-SNAPSHOT</version>
+            <version>${version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
