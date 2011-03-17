@@ -5,6 +5,7 @@ import static com.mulesoft.mql.Restriction.eq;
 import static com.mulesoft.mql.Restriction.gt;
 import static com.mulesoft.mql.Restriction.gte;
 import static com.mulesoft.mql.Restriction.lt;
+import static com.mulesoft.mql.Restriction.like;
 import static com.mulesoft.mql.Restriction.lte;
 import static com.mulesoft.mql.Restriction.or;
 import static com.mulesoft.mql.Restriction.property;
@@ -100,6 +101,20 @@ public class WhereTest extends Assert {
         result = query.execute(persons);
         
         assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testLike() throws Exception {
+        List<Person> persons = getPersons();
+        
+        Query query = new QueryBuilder()
+            .as("p")
+            .where(like(property("division"), "Sal"))
+            .build();
+        
+        Collection<Person> result = query.execute(persons);
+        
+        assertEquals(3, result.size());
     }
     
     private List<Person> getPersons() {

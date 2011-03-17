@@ -66,9 +66,23 @@ public class WherePredicate implements Predicate {
             return evaluateComparison(object, r) < 0;
         case LTE:
             return evaluateComparison(object, r) <= 0;
+        case LIKE:
+            return evaluateLike(object, r);
         }
         
         return false;
+    }
+
+    private boolean evaluateLike(Object object, Restriction r) {
+        if (r.getLeft() instanceof Restriction) {
+            throw new QueryException("The left side of a like clause cannot be a restriction.");
+        } else if (r.getRight() instanceof Restriction) {
+            throw new QueryException("The right side of a like clause cannot be a restriction.");
+        }
+        String left = evaluate(object, r.getLeft()).toString();
+        String right = evaluate(object, r.getRight()).toString();
+        
+        return left.toLowerCase().contains(right.toLowerCase());
     }
 
     private boolean and(Object object, Restriction r) {

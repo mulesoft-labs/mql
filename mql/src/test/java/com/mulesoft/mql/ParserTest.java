@@ -57,6 +57,16 @@ public class ParserTest extends Assert {
         
         assertEquals(2, result.size());
     }
+
+    @Test
+    public void testLike() {
+        List<Person> persons = getPersons();
+        
+        Collection<Map> result = 
+            Query.execute("from persons as p where p.division like 'Sal' and p.lastName = 'Schmoe'", asMap("persons", persons));
+        
+        assertEquals(2, result.size());
+    }
     
     @Test
     public void testSelect() {
