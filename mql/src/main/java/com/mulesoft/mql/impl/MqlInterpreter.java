@@ -129,9 +129,9 @@ public class MqlInterpreter extends DepthFirstAdapter {
             restrictions.add(Restriction.gt(leftObj, rightObj));
         } else if (node.getComparator() instanceof AGteComparator) {
             restrictions.add(Restriction.gte(leftObj, rightObj));
-        }  else if (node.getComparator() instanceof ALikeComparator) {
+        } else if (node.getComparator() instanceof ALikeComparator) {
             restrictions.add(Restriction.like(leftObj, rightObj));
-        }else {
+        } else {
             throw new IllegalStateException("unsupported comparator " + node.getComparator().getClass().getName());
         }
         
