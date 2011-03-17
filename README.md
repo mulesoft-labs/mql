@@ -97,9 +97,10 @@ on the person.
 
 Using MQL in Mule
 =================
-
-You can use the mql:transform element inside of Mule to do MQL transformations.
-Here is a very simple flow:
+There are two ways to use MQL in Mule. First, you can create a MQL query service.
+This is handy for turning existing data (e.g. cloud connectors) into services
+very quickly. For example, this simple config will create a new JSON data
+service for your twitter cloud connector:
 
 	<?xml version="1.0" encoding="UTF-8"?>
 	<mule xmlns="http://www.mulesoft.org/schema/mule/core" 
@@ -111,15 +112,34 @@ Here is a very simple flow:
 	               http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
 	               http://www.mulesoft.org/schema/mule/mql http://www.mulesoft.org/schema/mule/mql/3.1/mule-mql.xsd
 	               ">
-	
-	    <flow name="mql">
-	        <inbound-endpoint address="vm://select"
-	            exchange-pattern="request-response" />
-	        <mql:transform query="from payload where division = 'Sales'
-	                                select new { name = firstName + ' ' + lastName }" />
-	    </flow>
+	    <twitter:config id="twitter" ... />
+	    
+	    <mql:query-service
+	         name="recentMuleTweets"
+	         address="http://localhost:8080/recentMuleTweets"
+	         query="from twitter.userTimeline where message like 'mule'" />
 	
 	</mule>
+
+There is an optional type attribute which can be set to "POJO" or "JSON" depending
+on what data you want to return. For example, to work with POJOs you might configure
+the following:
+
+	    <mql:query-service
+	         name="recentMuleTweets"
+	         type="POJO"
+	         address="vm://recentMuleTweets"
+	         query="from twitter.userTimeline where message like 'mule'" />
+	
+You can also use the mql:transform element inside of Mule to do MQL transformations.
+Here is a very simple flow:
+
+    <flow name="mql">
+        <inbound-endpoint address="vm://select"
+            exchange-pattern="request-response" />
+        <mql:transform query="from payload where division = 'Sales'
+                                select new { name = firstName + ' ' + lastName }" />
+    </flow>
 
 If you want, you can refer to properties inside the Mule Message inside the 
 where or select statements. In this example, the property 'someData' is 
