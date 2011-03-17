@@ -8,7 +8,7 @@
  * LICENSE.txt file.
  */
 
-package com.mulesoft.mule.mql;
+package com.mulesoft.mql.mule;
 
 import org.mule.api.MuleException;
 import org.mule.api.client.MuleClient;

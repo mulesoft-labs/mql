@@ -1,4 +1,4 @@
-package com.mulesoft.mule.mql;
+package com.mulesoft.mql.mule;
 
 import org.mule.api.MuleMessage;
 import org.mule.api.lifecycle.InitialisationException;

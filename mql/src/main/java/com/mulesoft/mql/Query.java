@@ -156,6 +156,9 @@ public class Query {
         if (from instanceof Collection) {
             // transform a collection of objects
             items = (Collection<?>) from;
+        } else if (from.getClass().isArray()) {
+            // transform an array of objects
+            items = (Collection<?>) Arrays.asList((Object[]) from);
         } else {
             // support transformation on a single object
             items = Arrays.asList(from);

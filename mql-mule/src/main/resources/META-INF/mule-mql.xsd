@@ -37,4 +37,73 @@
         </xsd:complexContent>
     </xsd:complexType>
     
+    
+    <xsd:element name="query-service" type="queryServiceType" substitutionGroup="mule:abstract-flow-construct">
+        <xsd:annotation>
+            <xsd:documentation>
+                Defines a service which performs an MQL query where
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    
+    <xsd:attributeGroup name="queryServiceTypes">
+        <xsd:attribute name="type">
+            <xsd:annotation>
+                <xsd:documentation>
+                 
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:NMTOKEN">
+                    <xsd:enumeration value="json">
+                      <xsd:annotation>
+                        <xsd:documentation>
+                          
+                        </xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:enumeration>
+                    <xsd:enumeration value="pojo">
+                      <xsd:annotation>
+                        <xsd:documentation>
+                         
+                        </xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:enumeration>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+    </xsd:attributeGroup>
+    <xsd:complexType name="queryServiceType">
+        <xsd:annotation>
+            <xsd:documentation>
+                A query request-response service, with no outbound router.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="mule:baseFlowConstructType">
+                <xsd:attribute name="address" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The address on which this query service is listening.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="endpoint-ref" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The endpoint on which this query service is listening.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="query" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The MQL query for this service.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attributeGroup ref="queryServiceTypes" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
 </xsd:schema>
