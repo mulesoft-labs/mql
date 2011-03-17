@@ -9,13 +9,10 @@
  */
 package com.mulesoft.mql.mule;
 
-import org.mule.api.DefaultMuleException;
 import org.mule.api.MuleContext;
-import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.api.lifecycle.InitialisationException;
-import org.mule.api.processor.MessageProcessor;
 import org.mule.api.processor.MessageProcessorChainBuilder;
 import org.mule.api.routing.filter.Filter;
 import org.mule.api.source.MessageSource;
@@ -26,11 +23,6 @@ import org.mule.processor.ResponseMessageProcessorAdapter;
 import org.mule.routing.ChoiceRouter;
 import org.mule.transformer.types.DataTypeFactory;
 import org.mule.transport.http.transformers.FormTransformer;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
-import java.util.Map;
 
 public class QueryService extends AbstractFlowConstruct {
 
@@ -68,36 +60,9 @@ public class QueryService extends AbstractFlowConstruct {
     }
 
     protected void createJsonTransformers(MessageProcessorChainBuilder builder) throws InitialisationException {
-        final JsonToObject jsonArrayToObject = new JsonToObject();
-        jsonArrayToObject.setReturnDataType(DataTypeFactory.create(Map[].class));
-        jsonArrayToObject.setMuleContext(muleContext);
-        jsonArrayToObject.initialise();
-        
         final JsonToObject jsonToObject = new JsonToObject();
-        jsonToObject.setReturnDataType(DataTypeFactory.create(Map.class));
-        jsonToObject.setMuleContext(muleContext);
-        jsonToObject.initialise();
-        
-        builder.chain(new MessageProcessor() {
-
-            public MuleEvent process(MuleEvent event) throws MuleException {
-                PushbackInputStream stream = new PushbackInputStream(event.getMessage().getPayload(InputStream.class));
-                try {
-                    int firstChar = stream.read();
-                    if (firstChar == '[') {
-                        stream.unread(firstChar);
-                        MuleEvent event2 = jsonArrayToObject.process(event);
-                        System.out.println(event2.getMessage().getPayload());
-                                                return event2;
-                    } else {
-                        return jsonToObject.process(event);
-                    }
-                } catch (IOException e) {
-                    throw new DefaultMuleException(e);
-                }
-            }
-            
-        });
+        jsonToObject.setReturnDataType(DataTypeFactory.create(Object.class));
+        builder.chain(jsonToObject);
         builder.chain(new ResponseMessageProcessorAdapter(new ObjectToJson()));
     }
 
