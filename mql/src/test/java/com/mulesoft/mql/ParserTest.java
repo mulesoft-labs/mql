@@ -67,6 +67,25 @@ public class ParserTest extends Assert {
         
         assertEquals(2, result.size());
     }
+
+    @Test
+    public void testNullQuestion() {
+        List<Person> persons = getPersons();
+        
+        Collection<Map> result = 
+            Query.execute("from persons as p where p.?division = 'Sales' and p.lastName = 'Schmoe'", asMap("persons", persons));
+        
+        assertEquals(2, result.size());
+    }
+    @Test
+    public void testNotEquals() {
+        List<Person> persons = getPersons();
+        
+        Collection<Map> result = 
+            Query.execute("from persons as p where p.?division != 'Sales'", asMap("persons", persons));
+        
+        assertEquals(2, result.size());
+    }
     
     @Test
     public void testSelect() {

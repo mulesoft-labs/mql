@@ -22,6 +22,7 @@ import com.mulesoft.mql.grammar.node.AJoinJoinStatement;
 import com.mulesoft.mql.grammar.node.ALikeComparator;
 import com.mulesoft.mql.grammar.node.ALtComparator;
 import com.mulesoft.mql.grammar.node.ALteComparator;
+import com.mulesoft.mql.grammar.node.ANotEqualsComparator;
 import com.mulesoft.mql.grammar.node.AOnStatement;
 import com.mulesoft.mql.grammar.node.AOrWhereExpression;
 import com.mulesoft.mql.grammar.node.ASelectNewItem;
@@ -131,6 +132,8 @@ public class MqlInterpreter extends DepthFirstAdapter {
             restrictions.add(Restriction.gte(leftObj, rightObj));
         } else if (node.getComparator() instanceof ALikeComparator) {
             restrictions.add(Restriction.like(leftObj, rightObj));
+        }  else if (node.getComparator() instanceof ANotEqualsComparator) {
+            restrictions.add(Restriction.not(Restriction.eq(leftObj, rightObj)));
         } else {
             throw new IllegalStateException("unsupported comparator " + node.getComparator().getClass().getName());
         }

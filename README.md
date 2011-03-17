@@ -95,6 +95,19 @@ You can also control when the join happens via the on keyword:
 This will ensure the join happens only when there is a twitterId property 
 on the person.
 
+To handle the a null response fro the join method, you can do the following:
+
+    from people as p
+       join twitter.getUserInfo(p.twitterId) as twitterInfo 
+       select new {
+         name = p.name,
+         tweets = twitterInfo.?tweets
+       }
+
+This will ensure that your query will continue to work even if twitterInfo 
+is null for a particular user.
+
+
 Using MQL in Mule
 =================
 There are two ways to use MQL in Mule. First, you can create a MQL query service.

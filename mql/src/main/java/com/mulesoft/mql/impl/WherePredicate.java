@@ -54,6 +54,8 @@ public class WherePredicate implements Predicate {
         switch (r.getOperator()) {
         case EQUALS:
             return equals(object, r);
+        case NOT:
+            return !evaluate(object, (Restriction)r.getRight());
         case OR:
             return or(object, r);
         case AND:
