@@ -14,6 +14,7 @@ import org.mule.api.MuleContext;
 import org.mule.api.MuleEvent;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.processor.MessageProcessor;
 import org.mule.api.processor.MessageProcessorChainBuilder;
 import org.mule.api.routing.filter.Filter;
@@ -33,17 +34,40 @@ import java.util.Map;
 
 public class QueryService extends AbstractFlowConstruct {
 
+    public enum Type {
+        JSON,
+        POJO
+    }
+    
     private final String query;
+    private final Type type;
 
     public QueryService(String name, String query, 
+                        Type type,
                         MessageSource messageSource, MuleContext muleContext) {
         super(name, muleContext);
-        setMessageSource(messageSource);
+        this.type = type;
         this.query = query;
+        setMessageSource(messageSource);
     }
 
     @Override
     protected void configureMessageProcessors(MessageProcessorChainBuilder builder) throws MuleException {
+        if (type == Type.JSON) {
+            createJsonTransformers(builder);
+        }
+        
+        Filter formFilter = getFormFilter();
+        FormTransformer formTransformer = new FormTransformer();
+        ChoiceRouter choiceRouter = new ChoiceRouter();
+        choiceRouter.addRoute(formTransformer, formFilter);
+        
+        MqlTransformer mqlTransformer = new MqlTransformer();
+        mqlTransformer.setQuery(query);
+        builder.chain(mqlTransformer);
+    }
+
+    protected void createJsonTransformers(MessageProcessorChainBuilder builder) throws InitialisationException {
         final JsonToObject jsonArrayToObject = new JsonToObject();
         jsonArrayToObject.setReturnDataType(DataTypeFactory.create(Map[].class));
         jsonArrayToObject.setMuleContext(muleContext);
@@ -75,15 +99,6 @@ public class QueryService extends AbstractFlowConstruct {
             
         });
         builder.chain(new ResponseMessageProcessorAdapter(new ObjectToJson()));
-        
-        Filter formFilter = getFormFilter();
-        FormTransformer formTransformer = new FormTransformer();
-        ChoiceRouter choiceRouter = new ChoiceRouter();
-        choiceRouter.addRoute(formTransformer, formFilter);
-        
-        MqlTransformer mqlTransformer = new MqlTransformer();
-        mqlTransformer.setQuery(query);
-        builder.chain(mqlTransformer);
     }
 
     protected Filter getFormFilter() {

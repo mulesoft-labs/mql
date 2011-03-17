@@ -55,14 +55,14 @@
             </xsd:annotation>
             <xsd:simpleType>
                 <xsd:restriction base="xsd:NMTOKEN">
-                    <xsd:enumeration value="json">
+                    <xsd:enumeration value="JSON">
                       <xsd:annotation>
                         <xsd:documentation>
                           
                         </xsd:documentation>
                       </xsd:annotation>
                     </xsd:enumeration>
-                    <xsd:enumeration value="pojo">
+                    <xsd:enumeration value="POJO">
                       <xsd:annotation>
                         <xsd:documentation>
                          

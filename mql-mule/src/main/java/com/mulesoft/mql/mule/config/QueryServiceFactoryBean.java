@@ -16,6 +16,7 @@ import org.mule.config.spring.util.SpringBeanLookup;
 import org.mule.construct.builder.AbstractFlowConstructBuilder;
 
 import com.mulesoft.mql.mule.QueryService;
+import com.mulesoft.mql.mule.QueryService.Type;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -56,6 +57,9 @@ public class QueryServiceFactoryBean extends AbstractFlowConstructFactoryBean {
 
     public void setAddress(String address) {
         simpleServiceBuilder.inboundAddress(address);
+    }
+    public void setType(Type type) {
+        simpleServiceBuilder.type(type);
     }
 
 }

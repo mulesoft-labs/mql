@@ -6,6 +6,10 @@ import org.mule.api.client.LocalMuleClient;
 import org.mule.client.DefaultLocalMuleClient;
 import org.mule.tck.FunctionalTestCase;
 
+import com.mulesoft.mql.Person;
+
+import java.util.Map;
+
 public class QueryServiceTest extends FunctionalTestCase {
 
     @Override
@@ -33,7 +37,20 @@ public class QueryServiceTest extends FunctionalTestCase {
         
         payload = result.getPayloadAsString();
         assertEquals("[{\"name\":\"first last\"}]", payload);
+    }
+    
+    public void testPojo() throws Exception {
+        LocalMuleClient client = getClient();
+
+        Person person = new Person();
+        person.setFirstName("first");
+        person.setLastName("last");
+
+        MuleMessage result = client.send("vm://selectpojo", new DefaultMuleMessage(person, muleContext));
         
+        Object payload = result.getPayload();
+        System.out.println(payload);
+        assertTrue(payload instanceof Map);
     }
 
     protected LocalMuleClient getClient() {

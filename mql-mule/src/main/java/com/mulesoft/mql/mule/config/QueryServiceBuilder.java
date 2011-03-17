@@ -15,13 +15,20 @@ import org.mule.api.MuleException;
 import org.mule.construct.builder.AbstractFlowConstructWithSingleInboundEndpointBuilder;
 
 import com.mulesoft.mql.mule.QueryService;
+import com.mulesoft.mql.mule.QueryService.Type;
 
 public class QueryServiceBuilder extends AbstractFlowConstructWithSingleInboundEndpointBuilder<QueryServiceBuilder, QueryService>{
 
     private String query;
+    private Type type = Type.JSON;
     
     public QueryServiceBuilder query(String query) {
         this.query = query;
+        return this;
+    }
+
+    public QueryServiceBuilder type(Type type) {
+        this.type = type;
         return this;
     }
     
@@ -32,7 +39,7 @@ public class QueryServiceBuilder extends AbstractFlowConstructWithSingleInboundE
 
     @Override
     protected QueryService buildFlowConstruct(MuleContext muleContext) throws MuleException {
-        return new QueryService(name, query, getOrBuildInboundEndpoint(muleContext), muleContext);
+        return new QueryService(name, query, type, getOrBuildInboundEndpoint(muleContext), muleContext);
     }
 
 }
