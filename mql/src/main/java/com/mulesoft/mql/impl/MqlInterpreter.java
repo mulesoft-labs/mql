@@ -16,9 +16,12 @@ import com.mulesoft.mql.grammar.node.AAsStatement;
 import com.mulesoft.mql.grammar.node.AAsyncStatement;
 import com.mulesoft.mql.grammar.node.AEqualsComparator;
 import com.mulesoft.mql.grammar.node.AFullQuery;
+import com.mulesoft.mql.grammar.node.AGtComparator;
+import com.mulesoft.mql.grammar.node.AGteComparator;
 import com.mulesoft.mql.grammar.node.AJoinJoinStatement;
 import com.mulesoft.mql.grammar.node.ALikeComparator;
 import com.mulesoft.mql.grammar.node.ALtComparator;
+import com.mulesoft.mql.grammar.node.ALteComparator;
 import com.mulesoft.mql.grammar.node.AOnStatement;
 import com.mulesoft.mql.grammar.node.AOrWhereExpression;
 import com.mulesoft.mql.grammar.node.ASelectNewItem;
@@ -120,6 +123,12 @@ public class MqlInterpreter extends DepthFirstAdapter {
             restrictions.add(Restriction.eq(leftObj, rightObj));
         } else if (node.getComparator() instanceof ALtComparator) {
             restrictions.add(Restriction.lt(leftObj, rightObj));
+        } else if (node.getComparator() instanceof ALteComparator) {
+            restrictions.add(Restriction.lte(leftObj, rightObj));
+        } else if (node.getComparator() instanceof AGtComparator) {
+            restrictions.add(Restriction.gt(leftObj, rightObj));
+        } else if (node.getComparator() instanceof AGteComparator) {
+            restrictions.add(Restriction.gte(leftObj, rightObj));
         }  else if (node.getComparator() instanceof ALikeComparator) {
             restrictions.add(Restriction.like(leftObj, rightObj));
         }else {
