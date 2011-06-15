@@ -19,6 +19,7 @@ import org.mule.api.source.MessageSource;
 import org.mule.construct.AbstractFlowConstruct;
 import org.mule.module.json.transformers.JsonToObject;
 import org.mule.module.json.transformers.ObjectToJson;
+import org.mule.processor.NullMessageProcessor;
 import org.mule.processor.ResponseMessageProcessorAdapter;
 import org.mule.routing.ChoiceRouter;
 import org.mule.transformer.types.DataTypeFactory;
@@ -62,8 +63,26 @@ public class QueryService extends AbstractFlowConstruct {
     protected void createJsonTransformers(MessageProcessorChainBuilder builder) throws InitialisationException {
         final JsonToObject jsonToObject = new JsonToObject();
         jsonToObject.setReturnDataType(DataTypeFactory.create(Object.class));
-        builder.chain(jsonToObject);
+        
+        ChoiceRouter choiceRouter = new ChoiceRouter();
+        choiceRouter.addRoute(jsonToObject, getJsonFilter());
+        choiceRouter.setDefaultRoute(new NullMessageProcessor());
+        builder.chain(choiceRouter);
         builder.chain(new ResponseMessageProcessorAdapter(new ObjectToJson()));
+    }
+
+    protected Filter getJsonFilter() {
+        Filter formFilter = new Filter() {
+            
+            public boolean accept(MuleMessage msg) {
+                Object ct = msg.getInboundProperty("Content-Type");
+                if (ct != null && ct.toString().contains("application/json")) {
+                    return true;
+                }
+                return false;
+            }
+        };
+        return formFilter;
     }
 
     protected Filter getFormFilter() {

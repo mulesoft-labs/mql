@@ -152,7 +152,8 @@ Tokens
 
   null_literal = 'null';
 
-  string_literal = ''' string_character* ''';
+  string_literal = ''' string_character* ''' ;
+  double_quote_literal = '"' string_character* '"';
 
   // identifier
   identifier = java_letter java_letter_or_digit*;
@@ -173,8 +174,9 @@ Productions
   query = {select_only} select_statement |
           {full} from [fromvar]:mvel_expression as_statement? join_statement? where_statement? select_statement?;
 
-  join_statement = {join} join [joinexpression]:mvel_expression [joinas]:as [asvar]:identifier on_statement? async_statement?;
   as_statement = as [asvar]:identifier;
+
+  join_statement = {join} join [joinexpression]:mvel_expression [joinas]:as [asvar]:identifier on_statement? async_statement?;
   on_statement = on [on_expression]:mvel_expression;
   async_statement = async thread_statement?;
   thread_statement = left_paren [thread_count]:integer_literal right_paren;
@@ -195,12 +197,10 @@ Productions
     {like} like;
 
   /* Select statement */
-  select_statement = {select_new} select select_new_item 
-    | {select_properties} select select_properties;
+  select_statement = {select_new} select select_new_item ;
   select_new_item = new left_curly select_new_item_list right_curly;
   select_new_item_list = {list} select_new_item_property comma select_new_item_list | {single} select_new_item_property;
   select_new_item_property = identifier equals [equals_expression]:mvel_expression;
-  select_properties = object_var;
 
   /* MVEL expressions */
   mvel_operator = {plus} plus | {divide} divide | {multiply} multiply | {minus} minus 
@@ -214,20 +214,21 @@ Productions
     | {less_than_equals} less_than | {greater_than_equals} greater_than_equals
     | {equality} equality | {not_equals} not_equals
    */
-   
+ 
   mvel_expression = {component} mvel_expression_component
-  | {opeartor_expression} [left]:mvel_expression_component mvel_operator [right]:mvel_expression;
+   | {component_ref} mvel_expression_component period question_mark? mvel_expression
+   | {opeartor_expression} [left]:mvel_expression_component mvel_operator [right]:mvel_expression
+  ;
   mvel_function_arguments = {many} mvel_expression comma mvel_function_arguments | {one} mvel_expression;
-  mvel_function = object_var left_paren mvel_function_arguments? right_paren; 
+  mvel_function = identifier left_paren mvel_function_arguments? right_paren; 
   mvel_expression_component =
-    {component_array} mvel_expression_component left_bracket mvel_expression right_bracket
-    | {component_string} string_literal 
-    | {component_object} object_var
+    {component_string} string_literal 
+    | {component_array} mvel_expression_component left_bracket mvel_expression right_bracket
+    | {component_dblquotestring} double_quote_literal 
+    | {component_object} identifier
     | {component_function} mvel_function
     | {component_fp} floating_point_literal
     | {component_int} integer_literal
     | {component_null} null_literal;
-  
-  object_var = {identifier}identifier 
-    | {ref} [first]:identifier period question_mark? [second]:object_var;
+    
   

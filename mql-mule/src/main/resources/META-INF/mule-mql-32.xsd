@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns="http://www.mulesoft.org/schema/mule/mql"
+            xmlns:mql="http://mql.apache.org/core"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:mule="http://www.mulesoft.org/schema/mule/core"
+            xmlns:schemadoc="http://www.mulesoft.org/schema/mule/schemadoc"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            targetNamespace="http://www.mulesoft.org/schema/mule/mql"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+    <xsd:import namespace="http://www.springframework.org/schema/beans"
+                schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
+    <xsd:import namespace="http://www.mulesoft.org/schema/mule/core"
+                schemaLocation="http://www.mulesoft.org/schema/mule/core/3.2/mule.xsd"/>
+    <xsd:import namespace = "http://www.mulesoft.org/schema/mule/schemadoc"
+                schemaLocation = "http://www.mulesoft.org/schema/mule/schemadoc/3.2/mule-schemadoc.xsd"/>
+
+    <xsd:annotation>
+        <xsd:documentation>
+        </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:element name="transform" type="transformType" substitutionGroup="mule:abstract-transformer"/>
+    <xsd:complexType name="transformType">
+        <xsd:complexContent>
+            <xsd:extension base="mule:abstractTransformerType">
+                <xsd:attribute name="query" type="xsd:string">
+                    <xsd:annotation>
+                         <xsd:documentation>
+                         </xsd:documentation>
+                     </xsd:annotation>
+                </xsd:attribute>
+                
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    
+    
+    <xsd:element name="query-service" type="queryServiceType" substitutionGroup="mule:abstract-flow-construct">
+        <xsd:annotation>
+            <xsd:documentation>
+                Defines a service which performs an MQL query where
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    
+    <xsd:attributeGroup name="queryServiceTypes">
+        <xsd:attribute name="type">
+            <xsd:annotation>
+                <xsd:documentation>
+                 
+                </xsd:documentation>
+            </xsd:annotation>
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:NMTOKEN">
+                    <xsd:enumeration value="JSON">
+                      <xsd:annotation>
+                        <xsd:documentation>
+                          
+                        </xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:enumeration>
+                    <xsd:enumeration value="POJO">
+                      <xsd:annotation>
+                        <xsd:documentation>
+                         
+                        </xsd:documentation>
+                      </xsd:annotation>
+                    </xsd:enumeration>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+    </xsd:attributeGroup>
+    <xsd:complexType name="queryServiceType">
+        <xsd:annotation>
+            <xsd:documentation>
+                A query request-response service, with no outbound router.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexContent>
+            <xsd:extension base="mule:baseFlowConstructType">
+                <xsd:attribute name="address" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The address on which this query service is listening.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="endpoint-ref" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The endpoint on which this query service is listening.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="query" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            The MQL query for this service.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attributeGroup ref="queryServiceTypes" />
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+</xsd:schema>

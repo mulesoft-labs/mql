@@ -176,35 +176,33 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     private String parseSpaces(String expr, int start)
     {
-        int singleQuoteEnd = expr.indexOf('\'', start);
-        int doubleQuoteEnd = expr.indexOf('"', start);
-        if (singleQuoteEnd == -1) {
-            singleQuoteEnd = expr.length();
-        }
-        if (doubleQuoteEnd == -1) {
-            doubleQuoteEnd = expr.length();
-        }
-        int end = Math.min(singleQuoteEnd, doubleQuoteEnd);
+        int quoteStart = getNextQuoteIndex(expr, start);
+        int quoteEnd = getNextQuoteIndex(expr, quoteStart+1);
         
-        String newExpr = expr.substring(0, start) 
-            + expr.substring(start, end).replace(" ", "") ;
-        
-        if (end == expr.length())
-        {
-            return newExpr;
-        }
-        else
-        {
-            newExpr = newExpr + expr.substring(end);
-            int newStart;
-            if (singleQuoteEnd < doubleQuoteEnd) {
-                newStart = newExpr.indexOf('\'', start);
-            } else {
-                newStart = newExpr.indexOf('\"', start);
+        if (quoteStart == -1) { 
+            return expr.substring(0, start) + expr.substring(start).replace(" ", "");
+        } else if (quoteEnd == -1) {
+            return expr;
+        } else {
+            String part1 = expr.substring(0, start);
+            String part2 = expr.substring(start, quoteStart).replace(" ", "");
+            String part3 = expr.substring(quoteStart);
+            
+            String newExpr = part1 + part2 + part3;
+            int newStart = getNextQuoteIndex(part3, 1) + part1.length() + part2.length() + 1;
+            if (newStart == expr.length()) {
+                return newExpr;
             }
-            newStart += 3;
             return parseSpaces(newExpr, newStart);
         }
+    }
+
+    protected int getNextQuoteIndex(String expr, int start) {
+        int quoteStart = expr.indexOf('\'', start);
+        if (quoteStart != -1 && expr.charAt(quoteStart-1) == '\\') {
+            return getNextQuoteIndex(expr, quoteStart + 1);
+        }
+        return quoteStart;
     }
 
     @Override

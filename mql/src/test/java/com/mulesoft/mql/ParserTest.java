@@ -8,6 +8,7 @@ import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class ParserTest extends Assert {
@@ -146,6 +147,28 @@ public class ParserTest extends Assert {
             Query.execute("from test.persons as p where p.division = 'Sales'", context);
         
         assertEquals(3, result.size());
+    }
+    
+    @Test 
+    public void testSingleQuote() {
+        Query.create("from persons as p join salesforce.query('SELECT Company FROM Lead where email = \\'foo\\'', 1) as sfuser");
+    }
+
+    @Test 
+    public void testSingleQuote2() {
+        Query.create("from persons as p join salesforce.query('SELECT Company FROM Lead where email = \\'' + p.user + '\\'', 1) as sfuser");
+    }
+
+
+    @Test 
+    public void testArrayBracket() {
+        Query.create("from persons as p join salesforce.query() as sfuser select new { company = sfuser[0].Company } ");
+    }
+    
+    @Test 
+    @Ignore
+    public void testDoubleQuote() {
+        Query.create("from persons as p join salesforce.query(\"SELECT Company FROM Lead\", 1) as sfuser");
     }
     
     public List<Person> getPersons() {
