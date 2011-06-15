@@ -1,0 +1,106 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.mulesoft.mql</groupId>
+        <artifactId>mql-parent</artifactId>
+        <version>0.2-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>mql-examples</artifactId>
+
+    <name>Mashup Query Language Examples</name>
+    <properties>
+        <muleVersion>3.1.2</muleVersion>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.mulesoft.mql</groupId>
+            <artifactId>mql-mule</artifactId>
+            <version>${version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-http</artifactId>
+            <version>${muleVersion}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.mule.transports</groupId>
+            <artifactId>mule-transport-vm</artifactId>
+            <version>${muleVersion}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-spring-config</artifactId>
+            <version>${muleVersion}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>yammer-connector</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-twitter</artifactId>
+            <version>1.2-SNAPSHOT</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-ibeans</artifactId>
+            <version>${muleVersion}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mule.tests</groupId>
+            <artifactId>mule-tests-functional</artifactId>
+            <version>${muleVersion}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.derby</groupId>
+        	<artifactId>derby</artifactId>
+        	<version>10.8.1.2</version>
+        	<type>jar</type>
+        	<scope>compile</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.mule.transports</groupId>
+        	<artifactId>mule-transport-jdbc</artifactId>
+        	<version>${muleVersion}</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.mule.modules</groupId>
+        	<artifactId>mule-module-sfdc</artifactId>
+        	<version>3.0.2</version>
+        </dependency>
+        <dependency>
+        	<groupId>xerces</groupId>
+        	<artifactId>xercesImpl</artifactId>
+        	<version>2.9.1</version>
+        	<type>jar</type>
+        	<scope>compile</scope>
+        </dependency>
+    </dependencies>
+    
+    <repositories>
+        <repository>
+            <id>muleforge-repo</id>
+            <name>MuleForge Repository</name>
+            <url>http://repository.muleforge.org/release</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>ibeans-repo</id>
+            <name>iBeans Repository</name>
+            <url>http://repository.ibeans.muleforge.org</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+</project>

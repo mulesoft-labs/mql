@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:spring="http://www.springframework.org/schema/beans"
+    xmlns:mql="http://www.mulesoft.org/schema/mule/mql" 
+    xmlns:twitter="http://www.mulesoft.org/schema/mule/twitter"
+    xmlns:yammer="http://www.mulesoft.org/schema/mule/yammer"
+    xmlns:json="http://www.mulesoft.org/schema/mule/json"
+    xsi:schemaLocation="
+               http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+               http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
+               http://www.mulesoft.org/schema/mule/mql http://www.mulesoft.org/schema/mule/mql/3.1/mule-mql.xsd
+               http://www.mulesoft.org/schema/mule/twitter http://www.mulesoft.org/schema/mule/twitter/3.1/mule-twitter.xsd
+               http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/3.1/mule-json.xsd
+               http://www.mulesoft.org/schema/mule/yammer http://www.mulesoft.org/schema/mule/yammer/1.0-SNAPSHOT/mule-yammer.xsd
+               ">
+    <twitter:config name="twitter" format="JSON" 
+                  consumerKey="${twitter.consumer.key}" consumerSecret="${twitter.consumer.secret}"/>
+                          
+    <yammer:config name="yammer" 
+                   consumerKey="${yammer.consumer.key}" 
+                   consumerSecret="${yammer.consumer.secret}" 
+                   token="WzaFc3pPmpxevR05dblGQ" 
+                   secret="xrHU9djn8fv6V8SClcghtRXCJvWhGOYbDMgrLaw3I" />
+        
+    <flow name="get-activity">
+        <inbound-endpoint address="http://localhost:9002/activity" exchange-pattern="request-response"/>
+        <all>
+            <mql:transform query="from yammer.messages select new { text = body.plain }" />
+            <mql:transform query="from twitter.publicTimeline.toArray() as tweet select new { text = tweet.get('text') }" />
+        </all>
+        <combine-collections-transformer/>
+        <response>
+            <json:object-to-json-transformer/>
+        </response>
+    </flow>
+        
+    <flow name="request-authorization">
+        <inbound-endpoint address="http://localhost:9002/request-authorization"/>
+        <yammer:request-authorization/>
+        <message-properties-transformer>
+            <add-message-property key="http.status" value="302"/>
+            <add-message-property key="Location" value="#[payload]"/>
+        </message-properties-transformer>
+    </flow>
+    
+    <flow name="set-oauth-verifier">
+        <inbound-endpoint address="http://localhost:9002/set-oauth-verifier"/>
+        <yammer:set-oauth-verifier oauthVerifier="#[header:inbound:verifier]"/>
+    </flow>
+</mule>
+

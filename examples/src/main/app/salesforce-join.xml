@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:spring="http://www.springframework.org/schema/beans"
+    xmlns:mql="http://www.mulesoft.org/schema/mule/mql" 
+    xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+    xsi:schemaLocation="
+               http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+               http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
+               http://www.mulesoft.org/schema/mule/mql http://www.mulesoft.org/schema/mule/mql/3.1/mule-mql.xsd
+               http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/3.1/mule-salesforce.xsd
+               ">
+               
+    <salesforce:config name="salesforce" 
+        username="${salesforce.username}" 
+        password="${salesforce.password}"  
+        securityToken="${salesforce.securityToken}"/>
+    
+    <spring:bean name="userManager" class="com.mulesoft.mql.example.UserManager"/>
+
+    <mql:query-service
+    	name="JoinCompanyAndPhone"
+    	address="http://localhost:9002/users"
+    	query="from userManager.users as user
+    	         join salesforce.query('SELECT Id, Company, MobilePhone FROM Lead WHERE Email = \'' + user.email + '\'', 100) as sfuser
+    	         select new {
+    	         	name = user.name,
+    	         	email = user.email,
+    	         	company = sfuser[0].?Company,
+    	         	mobile = sfuser[0].?MobilePhone
+    	         }"
+    />
+</mule>
+
