@@ -161,7 +161,6 @@ public class MqlInterpreter extends DepthFirstAdapter {
     @Override
     public void caseASelectNewItem(ASelectNewItem node) {
         if (queryBuilder.getSelect() == null) {
-            System.out.println("Creating object " + node);
             objectBuilder.push(newObject());
             queryBuilder.select(objectBuilder.peek());
         }
@@ -170,7 +169,6 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     @Override
     public void inASelectMvelPropertySelectNewItemProperty(ASelectMvelPropertySelectNewItemProperty node) {
-        System.out.println("Creating mvel prop set " + node);
         String javaExpression = node.getEqualsExpression().toString();
         javaExpression = parseSpaces(javaExpression); //hack
         objectBuilder.peek().set(node.getIdentifier().getText(), javaExpression);
@@ -179,7 +177,6 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     @Override
     public void inASelectNewObjectSelectNewItemProperty(ASelectNewObjectSelectNewItemProperty node) {
-        System.out.println("Creating new sub object " + node);
         ObjectBuilder current = objectBuilder.peek();
         ObjectBuilder next = objectBuilder.push(newObject());
         current.set(node.getIdentifier().getText(), next);
