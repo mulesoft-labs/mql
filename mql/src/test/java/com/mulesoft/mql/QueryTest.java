@@ -14,7 +14,7 @@ public class QueryTest extends Assert {
     
     @Test
     public void testQuery() throws Exception {
-        List<Person> persons = getPersons();
+        List<User> persons = getPersons();
         
         Query query = new QueryBuilder()
             .as("p")
@@ -30,14 +30,14 @@ public class QueryTest extends Assert {
     }
     
     
-    private List<Person> getPersons() {
-        List<Person> persons = new ArrayList<Person>();
+    private List<User> getPersons() {
+        List<User> persons = new ArrayList<User>();
         
-        persons.add(new Person("Joe", "Schmoe", "Sales", 10000));
-        persons.add(new Person("Jane", "Schmoe", "Sales", 12000));
-        persons.add(new Person("Foo", "Bar", "Sales", 9000));
-        persons.add(new Person("Baz", "Bar", "Operations", 13000));
-        persons.add(new Person("Oof", "Fiz", "Operations", 20000));
+        persons.add(new User("Joe", "Schmoe", "Sales", 10000));
+        persons.add(new User("Jane", "Schmoe", "Sales", 12000));
+        persons.add(new User("Foo", "Bar", "Sales", 9000));
+        persons.add(new User("Baz", "Bar", "Operations", 13000));
+        persons.add(new User("Oof", "Fiz", "Operations", 20000));
         
         return persons;
     }

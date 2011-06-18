@@ -15,10 +15,10 @@ public class ParserTest extends Assert {
     
     @Test 
     public void testSingleClause() {
-        List<Person> persons = getPersons();
+        List<User> users = getUsers();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where p.division = 'Sales'", asMap("persons", persons));
+            Query.execute("from users as u where u.division = 'Sales'", asMap("users", users));
         
         assertEquals(3, result.size());
     }
@@ -31,76 +31,76 @@ public class ParserTest extends Assert {
 
     @Test
     public void testAnd() {
-        List<Person> persons = getPersons();
+        List<User> users = getUsers();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where p.division = 'Sales' and p.lastName = 'Schmoe'", asMap("persons", persons));
+            Query.execute("from users as u where u.division = 'Sales' and u.lastName = 'Schmoe'", asMap("users", users));
         
         assertEquals(2, result.size());
     }
     
     @Test
     public void testOr() {
-        List<Person> persons = getPersons();
+        List<User> users = getUsers();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where p.division = 'Sales' or p.lastName = 'Bar'", asMap("persons", persons));
+            Query.execute("from users as u where u.division = 'Sales' or u.lastName = 'Bar'", asMap("users", users));
         
         assertEquals(4, result.size());
     }
     
     @Test
     public void testParens() {
-        List<Person> persons = getPersons();
+        List<User> users = getUsers();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where (p.division = 'Sales' and p.lastName = 'Schmoe')", asMap("persons", persons));
+            Query.execute("from users as u where (u.division = 'Sales' and u.lastName = 'Schmoe')", asMap("users", users));
         
         assertEquals(2, result.size());
     }
 
     @Test
     public void testLike() {
-        List<Person> persons = getPersons();
+        List<User> users = getUsers();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where p.division like 'Sal' and p.lastName = 'Schmoe'", asMap("persons", persons));
+            Query.execute("from users as u where u.division like 'Sal' and u.lastName = 'Schmoe'", asMap("users", users));
         
         assertEquals(2, result.size());
     }
 
     @Test
     public void testNullQuestion() {
-        List<Person> persons = getPersons();
+        List<User> users = getUsers();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where p.?division = 'Sales' and p.lastName = 'Schmoe'", asMap("persons", persons));
+            Query.execute("from users as u where u.?division = 'Sales' and u.lastName = 'Schmoe'", asMap("users", users));
         
         assertEquals(2, result.size());
     }
     @Test
     public void testNotEquals() {
-        List<Person> persons = getPersons();
+        List<User> users = getUsers();
         
         Collection<Map> result = 
-            Query.execute("from persons as p where p.?division != 'Sales'", asMap("persons", persons));
+            Query.execute("from users as u where u.?division != 'Sales'", asMap("users", users));
         
         assertEquals(2, result.size());
     }
     
     @Test
     public void testSelect() {
-        List<Person> persons = getPersons();
+        List<User> users = getUsers();
         
         Collection<Map> result = 
             Query.execute(
-                    "from persons as p where p.firstName = 'Joe' " +
+                    "from users as u where u.firstName = 'Joe' " +
             		"select new { " +
-            		"  name = p.getFirstName() + ' ' + p.lastName, " +
-            		"  division = p.division," +
+            		"  name = u.getFirstName() + ' ' + u.lastName, " +
+            		"  division = u.division," +
             		"  value = Math.min(1,5)," + // test a function with arguments
-            		"  char = p.firstName[0] " + // test an array
-            		" }", asMap("persons", persons));
+            		"  char = u.firstName[0] " + // test an array
+            		" }", asMap("users", users));
         
         assertEquals(1, result.size());
         
@@ -112,16 +112,39 @@ public class ParserTest extends Assert {
     }
 
     @Test
-    public void testSelectWithExpression() {
-        List<Person> persons = getPersons();
+    public void testSubSelect() {
+        List<User> users = getUsers();
         
         Collection<Map> result = 
             Query.execute(
-                    "from persons as p where p.firstName = 'Joe' " +
+                    "from users as u where u.firstName = 'Joe' " +
                     "select new { " +
-                    "  name = p.firstName + \' \' + p.lastName, " +
-                    "  division = p.division " +
-                    "}", asMap("persons", persons));
+                    "  name = u.getFirstName() + ' ' + u.lastName, " +
+                    "  companyInfo = {" +
+                    "    division = u.division" +
+                    "  }" +
+                    "}", asMap("users", users));
+        
+        assertEquals(1, result.size());
+        
+        Map newItem = result.iterator().next();
+        assertEquals("Joe Schmoe", newItem.get("name"));
+        Map companyInfo = (Map) newItem.get("companyInfo");
+        assertNotNull(companyInfo);
+        assertEquals("Sales", companyInfo.get("division"));
+    }
+    
+    @Test
+    public void testSelectWithExpression() {
+        List<User> users = getUsers();
+        
+        Collection<Map> result = 
+            Query.execute(
+                    "from users as u where u.firstName = 'Joe' " +
+                    "select new { " +
+                    "  name = u.firstName + \' \' + u.lastName, " +
+                    "  division = u.division " +
+                    "}", asMap("users", users));
         assertEquals(1, result.size());
         
         Map newItem = result.iterator().next();
@@ -131,10 +154,10 @@ public class ParserTest extends Assert {
 
     @Test 
     public void testSelectOnly() {
-        List<Person> persons = getPersons();
+        List<User> users = getUsers();
         
         Collection<Map> result = 
-            Query.execute("select new { name = firstName + \' \' + lastName }", persons);
+            Query.execute("select new { name = firstName + \' \' + lastName }", users);
         
         assertEquals(5, result.size());
     }
@@ -144,42 +167,42 @@ public class ParserTest extends Assert {
         Map<String, Object> context = asMap("test", this);
         
         Collection<Map> result = 
-            Query.execute("from test.persons as p where p.division = 'Sales'", context);
+            Query.execute("from test.users as u where u.division = 'Sales'", context);
         
         assertEquals(3, result.size());
     }
     
     @Test 
     public void testSingleQuote() {
-        Query.create("from persons as p join salesforce.query('SELECT Company FROM Lead where email = \\'foo\\'', 1) as sfuser");
+        Query.create("from users as u join salesforce.query('SELECT Company FROM Lead where email = \\'foo\\'', 1) as sfuser");
     }
 
     @Test 
     public void testSingleQuote2() {
-        Query.create("from persons as p join salesforce.query('SELECT Company FROM Lead where email = \\'' + p.user + '\\'', 1) as sfuser");
+        Query.create("from users as u join salesforce.query('SELECT Company FROM Lead where email = \\'' + u.user + '\\'', 1) as sfuser");
     }
 
 
     @Test 
     public void testArrayBracket() {
-        Query.create("from persons as p join salesforce.query() as sfuser select new { company = sfuser[0].Company } ");
+        Query.create("from users as u join salesforce.query() as sfuser select new { company = sfuser[0].Company } ");
     }
     
     @Test 
     @Ignore
     public void testDoubleQuote() {
-        Query.create("from persons as p join salesforce.query(\"SELECT Company FROM Lead\", 1) as sfuser");
+        Query.create("from users as u join salesforce.query(\"SELECT Company FROM Lead\", 1) as sfuser");
     }
     
-    public List<Person> getPersons() {
-        List<Person> persons = new ArrayList<Person>();
+    public List<User> getUsers() {
+        List<User> users = new ArrayList<User>();
         
-        persons.add(new Person("Joe", "Schmoe", "Sales", 10000));
-        persons.add(new Person("Jane", "Schmoe", "Sales", 12000));
-        persons.add(new Person("Foo", "Bar", "Sales", 9000));
-        persons.add(new Person("Baz", "Bar", "Operations", 13000));
-        persons.add(new Person("Oof", "Fiz", "Operations", 20000));
+        users.add(new User("Joe", "Schmoe", "Sales", 10000));
+        users.add(new User("Jane", "Schmoe", "Sales", 12000));
+        users.add(new User("Foo", "Bar", "Sales", 9000));
+        users.add(new User("Baz", "Bar", "Operations", 13000));
+        users.add(new User("Oof", "Fiz", "Operations", 20000));
         
-        return persons;
+        return users;
     }
 }

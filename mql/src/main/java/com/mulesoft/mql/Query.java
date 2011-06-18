@@ -8,14 +8,13 @@ import com.mulesoft.mql.grammar.parser.ParserException;
 import com.mulesoft.mql.impl.JoinPredicate;
 import com.mulesoft.mql.impl.MqlInterpreter;
 import com.mulesoft.mql.impl.OrderByComparator;
+import com.mulesoft.mql.impl.SelectEvaluator;
 import com.mulesoft.mql.impl.WherePredicate;
 
 import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.lang.reflect.Constructor;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.commons.collections.functors.AndPredicate;
 import org.apache.commons.collections.functors.TruePredicate;
@@ -62,22 +60,19 @@ import org.mvel2.MVEL;
 public class Query {
 
     private final QueryBuilder queryBuilder;
-    private Map<String,Serializable> compiledExpressions = new HashMap<String,Serializable>();
     private Predicate joinPredicate;
     private Predicate wherePredicate;
     private JoinBuilder joinBuilder;
     private String defaultFromObject = "items";
     private Serializable compiledFromExpression;
+    private SelectEvaluator selectEvaluator;
 
     public Query(QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
 
         ObjectBuilder select = queryBuilder.getSelect();
         if (select != null) {
-            // Compile MVEL expressions
-            for (Map.Entry<String,String> e : select.getPropertyToExpression().entrySet()) {
-                compiledExpressions.put(e.getKey(), MVEL.compileExpression(e.getValue()));
-            }
+            selectEvaluator = new SelectEvaluator(queryBuilder, select);
         }
 
         joinBuilder = queryBuilder.getJoin();
@@ -269,13 +264,7 @@ public class Query {
             for (Object o : list) {
                 Map<String, Object> vars = (Map<String,Object>) o;
                 
-                Object transform;
-                if (select.getTransformClass() == null) {
-                    transform = transformToMap(vars);
-                } else {
-                    transform = transformToPojo(select.getTransformClass(), vars);
-                }
-                transformedObjects.add(transform);
+                transformedObjects.add(selectEvaluator.evaluate(vars));
             }
             
             list = transformedObjects;
@@ -303,35 +292,6 @@ public class Query {
         return wherePredicate;
     }
     
-    private Object transformToPojo(String clsName, Map<String, Object> vars) {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        try {
-            Class<?> cls = cl.loadClass(clsName);
-            Constructor<?> constructor = cls.getConstructor();
-            
-            Object t = constructor.newInstance();
-            for (Map.Entry<String,Serializable> e : compiledExpressions.entrySet()) {
-                PropertyUtils.setProperty(t, e.getKey(), MVEL.executeExpression(e.getValue(), vars));
-            }
-            return t;
-        } catch (ClassNotFoundException e1) {
-            throw new QueryException(MessageFormat.format("Select class {0} was not found.", clsName), e1);
-        } catch (NoSuchMethodException e) {
-            throw new QueryException(MessageFormat.format("Class {0} did not have an empty constructor.", clsName), e);
-        } catch (Exception e) {
-            throw new QueryException(e);
-        }
-    }
-
-    private Map<String, Object> transformToMap(Map<String, Object> vars) {
-        Map<String, Object> t = new HashMap<String,Object>();
-        
-        for (Map.Entry<String,Serializable> e : compiledExpressions.entrySet()) {
-            t.put(e.getKey(), MVEL.executeExpression(e.getValue(), vars.get(queryBuilder.getAs()), vars));
-        }
-        return t;
-    }
-
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("from xxxx");
@@ -358,6 +318,10 @@ public class Query {
         this.defaultFromObject = defaultFromObject;
     }
 
+    public void setExecutor(Executor executor) {
+        joinBuilder.executor(executor);
+    }
+    
     private final class JoinAndFilterRunnable implements Runnable {
         private final Predicate predicate;
         private final Map<String, Object> object;

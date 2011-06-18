@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class ObjectBuilder {
 
-    private Map<String,String> propertyToExpression = new HashMap<String,String>();
+    private Map<String,Object> propertyToValue = new HashMap<String,Object>();
     private String cls;
     
     protected ObjectBuilder(String cls) {
@@ -32,15 +32,19 @@ public class ObjectBuilder {
     }
     
     public ObjectBuilder set(String property, String expression) {
-        propertyToExpression.put(property, expression);
+        propertyToValue.put(property, expression);
         return this;
     }
 
-    public Map<String, String> getPropertyToExpression() {
-        return propertyToExpression;
+    public Map<String, Object> getPropertyToValues() {
+        return propertyToValue;
     }
 
     public String getTransformClass() {
         return cls;
+    }
+
+    public void set(String property, ObjectBuilder object) {
+        propertyToValue.put(property, object);
     }
 }

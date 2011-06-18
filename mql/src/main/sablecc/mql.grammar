@@ -109,6 +109,7 @@ Tokens
   join = 'join';
   on = 'on';
   async = 'async';
+  sync = 'sync';
   new = 'new';
   left_curly = '{';
   right_curly = '}';
@@ -178,7 +179,7 @@ Productions
 
   join_statement = {join} join [joinexpression]:mvel_expression [joinas]:as [asvar]:identifier on_statement? async_statement?;
   on_statement = on [on_expression]:mvel_expression;
-  async_statement = async thread_statement?;
+  async_statement = {async} async thread_statement? | {sync} sync;
   thread_statement = left_paren [thread_count]:integer_literal right_paren;
   
   /* Where statement */
@@ -197,10 +198,13 @@ Productions
     {like} like;
 
   /* Select statement */
-  select_statement = {select_new} select select_new_item ;
-  select_new_item = new left_curly select_new_item_list right_curly;
-  select_new_item_list = {list} select_new_item_property comma select_new_item_list | {single} select_new_item_property;
-  select_new_item_property = identifier equals [equals_expression]:mvel_expression;
+  select_statement = {select_new} select new select_new_item;
+  select_new_item = left_curly select_new_item_list right_curly;
+  select_new_item_list = {list} select_new_item_property comma select_new_item_list 
+  	| select_new_item_property;
+  select_new_item_property = 
+    {select_mvel_property} identifier equals [equals_expression]:mvel_expression
+    | {select_new_object} identifier equals select_new_item;
 
   /* MVEL expressions */
   mvel_operator = {plus} plus | {divide} divide | {multiply} multiply | {minus} minus 

@@ -22,34 +22,34 @@ public class WhereTest extends Assert {
     
     @Test
     public void testSimple() throws Exception {
-        List<Person> persons = getPersons();
+        List<User> persons = getPersons();
         
         Query query = new QueryBuilder()
             .as("p")
             .where(eq(property("division"), "Sales"))
             .build();
         
-        Collection<Person> result = query.execute(persons);
+        Collection<User> result = query.execute(persons);
         
         assertEquals(3, result.size());
     }
 
     @Test
     public void testOr() throws Exception {
-        List<Person> persons = getPersons();
+        List<User> persons = getPersons();
         
         Query query = new QueryBuilder()
             .where(or(eq(property("division"), "Sales"), eq(property("division"), "Operations")))
             .build();
         
-        Collection<Person> result = query.execute(persons);
+        Collection<User> result = query.execute(persons);
         
         assertEquals(5, result.size());
     }
     
     @Test
     public void testAnd() throws Exception {
-        List<Person> persons = getPersons();
+        List<User> persons = getPersons();
         
         Query query = new QueryBuilder()
             .where(and(eq(property("division"), "Sales"), 
@@ -58,20 +58,20 @@ public class WhereTest extends Assert {
             .max(3)
             .build();
         
-        Collection<Person> result = query.execute(persons);
+        Collection<User> result = query.execute(persons);
         
         assertEquals(1, result.size());
     }
     
     @Test
     public void testGreaterAndLessThan() throws Exception {
-        List<Person> persons = getPersons();
+        List<User> persons = getPersons();
         
         Query query = new QueryBuilder()
             .where(gt(property("income"), 9500))
             .build();
         
-        Collection<Person> result = query.execute(persons);
+        Collection<User> result = query.execute(persons);
         
         assertEquals(5, result.size());
         
@@ -105,27 +105,27 @@ public class WhereTest extends Assert {
 
     @Test
     public void testLike() throws Exception {
-        List<Person> persons = getPersons();
+        List<User> persons = getPersons();
         
         Query query = new QueryBuilder()
             .as("p")
             .where(like(property("division"), "Sal"))
             .build();
         
-        Collection<Person> result = query.execute(persons);
+        Collection<User> result = query.execute(persons);
         
         assertEquals(3, result.size());
     }
     
-    private List<Person> getPersons() {
-        List<Person> persons = new ArrayList<Person>();
+    private List<User> getPersons() {
+        List<User> persons = new ArrayList<User>();
         
-        persons.add(new Person("Joe", "Schmoe", "Sales", 10000));
-        persons.add(new Person("Jane", "Schmoe", "Sales", 12000));
-        persons.add(new Person("Foo", "Bar", "Sales", 9000));
-        persons.add(new Person("Baz", "Bar", "Operations", 13000));
-        persons.add(new Person("Oof", "Fiz", "Operations", 20000));
-        persons.add(new Person("Liz", "Biz", "Accounting", 20000));
+        persons.add(new User("Joe", "Schmoe", "Sales", 10000));
+        persons.add(new User("Jane", "Schmoe", "Sales", 12000));
+        persons.add(new User("Foo", "Bar", "Sales", 9000));
+        persons.add(new User("Baz", "Bar", "Operations", 13000));
+        persons.add(new User("Oof", "Fiz", "Operations", 20000));
+        persons.add(new User("Liz", "Biz", "Accounting", 20000));
         
         return persons;
     }

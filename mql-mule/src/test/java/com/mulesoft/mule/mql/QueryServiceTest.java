@@ -6,7 +6,7 @@ import org.mule.api.client.LocalMuleClient;
 import org.mule.client.DefaultLocalMuleClient;
 import org.mule.tck.FunctionalTestCase;
 
-import com.mulesoft.mql.Person;
+import com.mulesoft.mql.User;
 
 import java.util.Map;
 
@@ -42,7 +42,7 @@ public class QueryServiceTest extends FunctionalTestCase {
     public void testPojo() throws Exception {
         LocalMuleClient client = getClient();
 
-        Person person = new Person();
+        User person = new User();
         person.setFirstName("first");
         person.setLastName("last");
 

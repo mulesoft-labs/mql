@@ -13,7 +13,7 @@ import com.mulesoft.mql.Restriction;
 import com.mulesoft.mql.grammar.analysis.DepthFirstAdapter;
 import com.mulesoft.mql.grammar.node.AAndWhereExpression;
 import com.mulesoft.mql.grammar.node.AAsStatement;
-import com.mulesoft.mql.grammar.node.AAsyncStatement;
+import com.mulesoft.mql.grammar.node.AAsyncAsyncStatement;
 import com.mulesoft.mql.grammar.node.AEqualsComparator;
 import com.mulesoft.mql.grammar.node.AFullQuery;
 import com.mulesoft.mql.grammar.node.AGtComparator;
@@ -25,9 +25,11 @@ import com.mulesoft.mql.grammar.node.ALteComparator;
 import com.mulesoft.mql.grammar.node.ANotEqualsComparator;
 import com.mulesoft.mql.grammar.node.AOnStatement;
 import com.mulesoft.mql.grammar.node.AOrWhereExpression;
+import com.mulesoft.mql.grammar.node.ASelectMvelPropertySelectNewItemProperty;
 import com.mulesoft.mql.grammar.node.ASelectNewItem;
-import com.mulesoft.mql.grammar.node.ASelectNewItemProperty;
+import com.mulesoft.mql.grammar.node.ASelectNewObjectSelectNewItemProperty;
 import com.mulesoft.mql.grammar.node.ASelectOnlyQuery;
+import com.mulesoft.mql.grammar.node.ASyncAsyncStatement;
 import com.mulesoft.mql.grammar.node.AThreadStatement;
 import com.mulesoft.mql.grammar.node.AVariableWhereSide;
 import com.mulesoft.mql.grammar.node.AWhereClause;
@@ -39,7 +41,7 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     private QueryBuilder queryBuilder;
     private Stack<Restriction> restrictions = new Stack<Restriction>();
-    private ObjectBuilder objectBuilder;
+    private Stack<ObjectBuilder> objectBuilder = new Stack<ObjectBuilder>();
     private JoinBuilder join;
 
     @Override
@@ -84,9 +86,15 @@ public class MqlInterpreter extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseAAsyncStatement(AAsyncStatement node) {
+    public void caseAAsyncAsyncStatement(AAsyncAsyncStatement node) {
         join.async();
-        super.caseAAsyncStatement(node);
+        super.caseAAsyncAsyncStatement(node);
+    }
+
+    @Override
+    public void outASyncAsyncStatement(ASyncAsyncStatement node) {
+        join.sync();
+        super.outASyncAsyncStatement(node);
     }
 
     @Override
@@ -152,17 +160,36 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     @Override
     public void caseASelectNewItem(ASelectNewItem node) {
-        objectBuilder = newObject();
+        if (queryBuilder.getSelect() == null) {
+            System.out.println("Creating object " + node);
+            objectBuilder.push(newObject());
+            queryBuilder.select(objectBuilder.peek());
+        }
         super.caseASelectNewItem(node);
-        queryBuilder.select(objectBuilder);
     }
 
     @Override
-    public void caseASelectNewItemProperty(ASelectNewItemProperty node) {
+    public void inASelectMvelPropertySelectNewItemProperty(ASelectMvelPropertySelectNewItemProperty node) {
+        System.out.println("Creating mvel prop set " + node);
         String javaExpression = node.getEqualsExpression().toString();
         javaExpression = parseSpaces(javaExpression); //hack
-        objectBuilder.set(node.getIdentifier().getText(), javaExpression);
-        super.caseASelectNewItemProperty(node);
+        objectBuilder.peek().set(node.getIdentifier().getText(), javaExpression);
+        super.inASelectMvelPropertySelectNewItemProperty(node);
+    }
+
+    @Override
+    public void inASelectNewObjectSelectNewItemProperty(ASelectNewObjectSelectNewItemProperty node) {
+        System.out.println("Creating new sub object " + node);
+        ObjectBuilder current = objectBuilder.peek();
+        ObjectBuilder next = objectBuilder.push(newObject());
+        current.set(node.getIdentifier().getText(), next);
+        super.inASelectNewObjectSelectNewItemProperty(node);
+    }
+
+    @Override
+    public void outASelectNewObjectSelectNewItemProperty(ASelectNewObjectSelectNewItemProperty node) {
+        super.outASelectNewObjectSelectNewItemProperty(node);
+        objectBuilder.pop();
     }
 
     /**

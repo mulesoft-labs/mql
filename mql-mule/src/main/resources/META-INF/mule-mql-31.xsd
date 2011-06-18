@@ -29,6 +29,14 @@
                 <xsd:attribute name="query" type="xsd:string">
                     <xsd:annotation>
                          <xsd:documentation>
+                         The MQL query.
+                         </xsd:documentation>
+                     </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="executor-ref" type="xsd:string">
+                    <xsd:annotation>
+                         <xsd:documentation>
+                            An executor for async joins.
                          </xsd:documentation>
                      </xsd:annotation>
                 </xsd:attribute>

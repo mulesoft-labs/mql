@@ -11,39 +11,39 @@ Using the Query Language
 Executing queries is simple:
 
 	// populate some data
-	List<Person> persons = new ArrayList<Person>();
-	persons.add(new Person("Dan", "Diephouse", "MuleSoft", "Engineering"));
-	persons.add(new Person("Joe", "Sales", "MuleSoft", "Sales"));
+	List<User> users = new ArrayList<User>();
+	users.add(new User("Dan", "Diephouse", "MuleSoft", "Engineering"));
+	users.add(new User("Joe", "Sales", "MuleSoft", "Sales"));
 	
 	// create a context for the query
 	Map<String,Object> context = new HashMap<String,Object>();
-	context.put("persons", persons);
+	context.put("users", users);
 	
 	// execute the query
-	Collection<Person> result = 
-	    Query.execute("from people where division = 'Engineering'", context);
+	Collection<User> result = 
+	    Query.execute("from users where division = 'Engineering'", context);
 	  
-	assertEquals(1, result.size()); // the result will just contain the first person
+	assertEquals(1, result.size()); // the result will just contain the first user
 
 The query syntax is best illustrated by example queries below.
 
 Filtering Collections:
 
 	from people where division = 'Sales'
-	from people as p where p.division = 'Sales' // explicit syntax
+	from people as u where u.division = 'Sales' // explicit syntax
 	from people where division = 'Sales' and (firstName = 'Dan' or firstName = 'Joe')
 	from people where division = 'Sales' 
 
 Querying objects in your query context:
    
     // execute the getPeople() method on the salesforce object
-    from salesforce.people as p where p.lastName = 'Diephouse'
+    from salesforce.people as u where u.lastName = 'Diephouse'
     // the more explicit syntax is also valid
-    from salesforce.getPeople() as p where p.lastName = 'Diephouse'
+    from salesforce.getPeople() as u where u.lastName = 'Diephouse'
     
 Ordering collections:
 
-	from people as p order by name
+	from people as u order by name
 
 Transforming a collection into new objects:
 
@@ -54,23 +54,23 @@ Transforming a collection into new objects:
 	}
 	
 	// This example shows the more explicit syntax
-	from persons as p select new {
-	  href = 'http://localhost/sales/people/' + p.id,
-	  name = p.firstName + ' ' + p.lastName,
-	  division = p.division
+	from users as u select new {
+	  href = 'http://localhost/sales/people/' + u.id,
+	  name = u.firstName + ' ' + u.lastName,
+	  division = u.division
 	}
 
 These queries will create a new set of objects with href and name properties. 
 The href property will be a combination of the string url and the object id. 
 The name property will be a synthesis of the first and last name from the 
-person object.
+user object.
 
 Joining a data source:
 
-   from people as p 
-     join twitter.getUserInfo(p.twitterId) as twitterInfo
+   from people as u 
+     join twitter.getUserInfo(u.twitterId) as twitterInfo
      select new {
-       name = p.firstName + ' ' + p.lastName,
+       name = u.firstName + ' ' + u.lastName,
        tweets = twitterInfo.totalTweets
      }
 
@@ -84,23 +84,23 @@ the number of threads you wish to use to do the join (i.e. the number of rows
 you want to process simultaneously) via the async keyword. E.g. this will use
 10 threads to do the join:
 
-    from people as p
-       join twitter.getUserInfo(p.twitterId) as twitterInfo async(10) ...       
+    from people as u
+       join twitter.getUserInfo(u.twitterId) as twitterInfo async(10) ...       
 
 You can also control when the join happens via the on keyword:
 
-    from people as p
-       join twitter.getUserInfo(p.twitterId) as twitterInfo on p.twitterId ...       
+    from people as u
+       join twitter.getUserInfo(u.twitterId) as twitterInfo on u.twitterId ...       
 
 This will ensure the join happens only when there is a twitterId property 
-on the person.
+on the user.
 
 To handle the a null response fro the join method, you can do the following:
 
-    from people as p
-       join twitter.getUserInfo(p.twitterId) as twitterInfo 
+    from people as u
+       join twitter.getUserInfo(u.twitterId) as twitterInfo 
        select new {
-         name = p.name,
+         name = u.name,
          tweets = twitterInfo.?tweets
        }
 
@@ -167,7 +167,7 @@ is created via the select statement.
         </message-properties-transformer>/>
         <mql:transform 
             query="from payload
-                     join mule.send('vm://twitter', p.twitterId) as twitterInfo
+                     join mule.send('vm://twitter', u.twitterId) as twitterInfo
                      select new { 
                         name = firstName + ' ' + lastName, 
                         data = someData 
@@ -185,8 +185,8 @@ itself is sound and should work)
 You can then join it in using the bean name:
 
     <mql:transform 
-        query="from payload as p 
-                 join twitter.getUserInfo(p.twitterId) as twitterInfo
+        query="from payload as u 
+                 join twitter.getUserInfo(u.twitterId) as twitterInfo
                  select new { 
                     name = firstName + ' ' + lastName, 
                     tweets = twitterInfo.totalTweets 
@@ -200,8 +200,8 @@ mule query context variable and the send method.
         <inbound-endpoint address="vm://join"
             exchange-pattern="request-response" />
         <mql:transform 
-            query="from payload as p 
-                     join mule.send('vm://twitter', p.twitterId) as twitterInfo
+            query="from payload as u 
+                     join mule.send('vm://twitter', u.twitterId) as twitterInfo
                      select new { 
                         name = firstName + ' ' + lastName, 
                         tweets = twitterInfo.totalTweets 
@@ -236,7 +236,7 @@ Spring ApplicationContext. You can implement a SpringQueryContext like this:
 
 Let's say that you have a bean defined in your Spring context like this:
 
-    <bean id="personDao" class="....PersonDAOImpl"/>
+    <bean id="userDao" class="....UserDAOImpl"/>
     
 Now you can write queries against it:
 
@@ -245,19 +245,19 @@ Now you can write queries against it:
 	Map<String,Object> queryContext = new SpringQueryContext(applicationContext);
 	
 	// execute the query
-	Collection<Person> result = 
-	    Query.execute("from personDao.persons where division = 'Engineering'", queryContext);
+	Collection<User> result = 
+	    Query.execute("from userDao.users where division = 'Engineering'", queryContext);
 	  
-This will call getPeople() on your personManager bean. 
+This will call getPeople() on your userManager bean. 
 
 You could also use it to join data across different beans. E.g., this query
 joins a list of divisions inside a company with a list of people in each
 division.
   
     from divisionDao as division 
-      join personDao.getPersonsForDivision(division.id) as peopleInDivision
+      join userDao.getUsersForDivision(division.id) as usersInDivision
 	  select new {
 	     name = division.name,
-	     people = peopleInDivision
+	     people = usersInDivision
 	  }
 	  

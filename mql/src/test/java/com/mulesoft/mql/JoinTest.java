@@ -96,10 +96,10 @@ public class JoinTest extends Assert {
 
     @Test
     public void joinOnNonNullVariable() throws Exception {
-        List<Person> persons = new ArrayList<Person>();
+        List<User> persons = new ArrayList<User>();
         
-        persons.add(new Person("Joe", "Schmoe", "Sales", 10000, "joeschmoe"));
-        persons.add(new Person("Jane", "Schmoe", "Sales", 12000, null));
+        persons.add(new User("Joe", "Schmoe", "Sales", 10000, "joeschmoe"));
+        persons.add(new User("Jane", "Schmoe", "Sales", 12000, null));
 
         Twitter twitter = getMockTwitter();
         
@@ -139,7 +139,7 @@ public class JoinTest extends Assert {
     }
 
     protected Map<String, Object> getMockContext() {
-        List<Person> persons = getPersons();
+        List<User> persons = getPersons();
         Twitter twitter = getMockTwitter();
         
         Map<String,Object> context = new HashMap<String,Object>();
@@ -163,11 +163,11 @@ public class JoinTest extends Assert {
         return twitter;
     }
     
-    private List<Person> getPersons() {
-        List<Person> persons = new ArrayList<Person>();
+    private List<User> getPersons() {
+        List<User> persons = new ArrayList<User>();
         
-        persons.add(new Person("Joe", "Schmoe", "Sales", 10000, "joeschmoe"));
-        persons.add(new Person("Jane", "Schmoe", "Sales", 12000, "janeschmoe"));
+        persons.add(new User("Joe", "Schmoe", "Sales", 10000, "joeschmoe"));
+        persons.add(new User("Jane", "Schmoe", "Sales", 12000, "janeschmoe"));
         
         return persons;
     }

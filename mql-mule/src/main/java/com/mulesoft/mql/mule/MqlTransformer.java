@@ -11,12 +11,14 @@ import com.mulesoft.mql.LazyQueryContext;
 import com.mulesoft.mql.Query;
 
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 public class MqlTransformer extends AbstractMessageTransformer {
 
     private String query;
     private MuleClientWrapper clientWrapper;
     private Query compiledQuery;
+    private Executor executor;
     
     @Override
     public void initialise() throws InitialisationException {
@@ -25,6 +27,7 @@ public class MqlTransformer extends AbstractMessageTransformer {
         clientWrapper = new MuleClientWrapper(new DefaultLocalMuleClient(muleContext));
         compiledQuery = Query.create(query);
         compiledQuery.setDefaultSelectObject("payload");
+        compiledQuery.setExecutor(executor);
     }
 
     public Object transformMessage(final MuleMessage message, String outputEncoding) throws TransformerException {
@@ -38,6 +41,10 @@ public class MqlTransformer extends AbstractMessageTransformer {
 
     public void setQuery(String query) {
         this.query = query;
+    }
+
+    public void setExecutor(Executor executor) {
+        this.executor = executor;
     }
 
     public class MuleMessageQueryContext extends LazyQueryContext {

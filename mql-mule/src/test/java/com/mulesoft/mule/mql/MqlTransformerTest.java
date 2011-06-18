@@ -8,7 +8,7 @@ import org.mule.api.client.LocalMuleClient;
 import org.mule.client.DefaultLocalMuleClient;
 import org.mule.tck.FunctionalTestCase;
 
-import com.mulesoft.mql.Person;
+import com.mulesoft.mql.User;
 
 public class MqlTransformerTest extends FunctionalTestCase {
 
@@ -20,7 +20,7 @@ public class MqlTransformerTest extends FunctionalTestCase {
     public void testSelect() throws Exception {
         LocalMuleClient client = getClient();
         
-        Person person = new Person();
+        User person = new User();
         person.setFirstName("first");
         person.setLastName("last");
         
@@ -35,7 +35,7 @@ public class MqlTransformerTest extends FunctionalTestCase {
     public void testJoin() throws Exception {
         LocalMuleClient client = getClient();
         
-        Person person = new Person();
+        User person = new User();
         person.setFirstName("first");
         person.setLastName("last");
         person.setTwitterId("123");
