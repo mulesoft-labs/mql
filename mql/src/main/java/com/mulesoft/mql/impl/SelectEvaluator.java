@@ -54,7 +54,12 @@ public class SelectEvaluator {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         try {
             Class<?> cls = cl.loadClass(clsName);
-            Constructor<?> constructor = cls.getConstructor();
+            Constructor<?> constructor;
+            try {
+                constructor = cls.getConstructor();
+            } catch (NoSuchMethodException e) {
+                throw new QueryException(MessageFormat.format("Class {0} did not have an empty constructor.", clsName), e);
+            } 
             
             Object t = constructor.newInstance();
             for (Map.Entry<String,Serializable> e : compiledExpressions.entrySet()) {
@@ -63,8 +68,6 @@ public class SelectEvaluator {
             return t;
         } catch (ClassNotFoundException e1) {
             throw new QueryException(MessageFormat.format("Select class {0} was not found.", clsName), e1);
-        } catch (NoSuchMethodException e) {
-            throw new QueryException(MessageFormat.format("Class {0} did not have an empty constructor.", clsName), e);
         } catch (Exception e) {
             throw new QueryException(e);
         }

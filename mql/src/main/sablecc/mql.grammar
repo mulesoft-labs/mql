@@ -198,13 +198,17 @@ Productions
     {like} like;
 
   /* Select statement */
-  select_statement = {select_new} select new select_new_item;
+  select_statement = {select_new} select new_statement select_new_item;
+  new_statement = new class_parens?;
+  class_name = {single} identifier | 
+   	{multiple} class_name period identifier;
+  class_parens = left_paren class_name right_paren;
   select_new_item = left_curly select_new_item_list right_curly;
   select_new_item_list = {list} select_new_item_property comma select_new_item_list 
   	| select_new_item_property;
   select_new_item_property = 
     {select_mvel_property} identifier equals [equals_expression]:mvel_expression
-    | {select_new_object} identifier equals select_new_item;
+    | {select_new_object} identifier equals new_statement? select_new_item;
 
   /* MVEL expressions */
   mvel_operator = {plus} plus | {divide} divide | {multiply} multiply | {minus} minus 

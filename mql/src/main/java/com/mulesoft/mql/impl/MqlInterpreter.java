@@ -14,6 +14,7 @@ import com.mulesoft.mql.grammar.analysis.DepthFirstAdapter;
 import com.mulesoft.mql.grammar.node.AAndWhereExpression;
 import com.mulesoft.mql.grammar.node.AAsStatement;
 import com.mulesoft.mql.grammar.node.AAsyncAsyncStatement;
+import com.mulesoft.mql.grammar.node.AClassParens;
 import com.mulesoft.mql.grammar.node.AEqualsComparator;
 import com.mulesoft.mql.grammar.node.AFullQuery;
 import com.mulesoft.mql.grammar.node.AGtComparator;
@@ -22,12 +23,14 @@ import com.mulesoft.mql.grammar.node.AJoinJoinStatement;
 import com.mulesoft.mql.grammar.node.ALikeComparator;
 import com.mulesoft.mql.grammar.node.ALtComparator;
 import com.mulesoft.mql.grammar.node.ALteComparator;
+import com.mulesoft.mql.grammar.node.ANewStatement;
 import com.mulesoft.mql.grammar.node.ANotEqualsComparator;
 import com.mulesoft.mql.grammar.node.AOnStatement;
 import com.mulesoft.mql.grammar.node.AOrWhereExpression;
 import com.mulesoft.mql.grammar.node.ASelectMvelPropertySelectNewItemProperty;
 import com.mulesoft.mql.grammar.node.ASelectNewItem;
 import com.mulesoft.mql.grammar.node.ASelectNewObjectSelectNewItemProperty;
+import com.mulesoft.mql.grammar.node.ASelectNewSelectStatement;
 import com.mulesoft.mql.grammar.node.ASelectOnlyQuery;
 import com.mulesoft.mql.grammar.node.ASyncAsyncStatement;
 import com.mulesoft.mql.grammar.node.AThreadStatement;
@@ -43,6 +46,7 @@ public class MqlInterpreter extends DepthFirstAdapter {
     private Stack<Restriction> restrictions = new Stack<Restriction>();
     private Stack<ObjectBuilder> objectBuilder = new Stack<ObjectBuilder>();
     private JoinBuilder join;
+    private String transformClass;
 
     @Override
     public void caseAFullQuery(AFullQuery node) {
@@ -159,14 +163,22 @@ public class MqlInterpreter extends DepthFirstAdapter {
     }
 
     @Override
-    public void caseASelectNewItem(ASelectNewItem node) {
+    public void caseASelectNewSelectStatement(ASelectNewSelectStatement node) {
         if (queryBuilder.getSelect() == null) {
             objectBuilder.push(newObject());
             queryBuilder.select(objectBuilder.peek());
         }
-        super.caseASelectNewItem(node);
+        super.caseASelectNewSelectStatement(node);
     }
-
+    
+    @Override
+    public void caseAClassParens(AClassParens node) {
+        if (node.getClassName() != null) {
+            objectBuilder.peek().setTransformClass(parseSpaces(node.getClassName().toString()));
+        }
+        super.caseAClassParens(node);
+    }
+    
     @Override
     public void inASelectMvelPropertySelectNewItemProperty(ASelectMvelPropertySelectNewItemProperty node) {
         String javaExpression = node.getEqualsExpression().toString();

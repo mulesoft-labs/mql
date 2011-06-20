@@ -12,6 +12,8 @@ package com.mulesoft.mql.example;
 public class User {
     private String name;
     private String email;
+    private Address address;
+    
     public String getName() {
         return name;
     }

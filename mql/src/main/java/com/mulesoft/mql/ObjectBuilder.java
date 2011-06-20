@@ -40,6 +40,10 @@ public class ObjectBuilder {
         return propertyToValue;
     }
 
+    public void setTransformClass(String name) {
+        this.cls = name;
+    }
+    
     public String getTransformClass() {
         return cls;
     }

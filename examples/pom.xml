@@ -81,6 +81,13 @@
         	<type>jar</type>
         	<scope>compile</scope>
         </dependency>
+        <dependency>
+        	<groupId>org.mule.modules</groupId>
+        	<artifactId>mule-module-jersey</artifactId>
+        	<version>3.1.2</version>
+        	<type>jar</type>
+        	<scope>compile</scope>
+        </dependency>
     </dependencies>
     
     <repositories>

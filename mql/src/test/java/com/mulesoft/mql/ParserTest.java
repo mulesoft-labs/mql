@@ -1,5 +1,9 @@
 package com.mulesoft.mql;
 
+import static com.mulesoft.mql.ObjectBuilder.newObject;
+import static com.mulesoft.mql.Restriction.eq;
+import static com.mulesoft.mql.Restriction.property;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -109,6 +113,22 @@ public class ParserTest extends Assert {
         assertEquals("Sales", newItem.get("division"));
         assertEquals(1, newItem.get("value"));
         assertEquals('J', newItem.get("char"));
+    }
+    
+    @Test
+    public void testSelectPojo() {  
+        List<User> users = getUsers();
+        Collection<UserDto> result = 
+            Query.execute(
+                    "from users as u where u.firstName = 'Joe' " +
+                    "select new (com.mulesoft.mql.UserDto) { " +
+                    "  name = u.getFirstName() + ' ' + u.lastName " + // test an array
+                    " }", asMap("users", users));
+        
+        assertEquals(1, result.size());
+     
+        UserDto newPerson = result.iterator().next();
+        assertEquals("Joe Schmoe", newPerson.getName());
     }
 
     @Test
