@@ -82,4 +82,19 @@
             </plugin>
         </plugins>
     </build>
+    
+    <scm>
+        <connection>scm:git:git://github.com:mulesoft/mql.git
+        </connection>
+        <developerConnection>
+            scm:git:git@github.com:mulesoft/mql.git
+        </developerConnection>
+        <url>http://github.com/mulesoft/mql</url>
+    </scm>
+
+    <organization>
+        <url>http://mulesoft.com</url>
+        <name>MuleSoft, Inc</name>
+    </organization>
+    
 </project>
