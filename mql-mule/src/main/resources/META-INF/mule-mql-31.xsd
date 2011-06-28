@@ -33,6 +33,31 @@
                          </xsd:documentation>
                      </xsd:annotation>
                 </xsd:attribute>
+                <xsd:attribute name="type" default="POJO">
+                    <xsd:annotation>
+                        <xsd:documentation>                            
+                            The format of the incoming and outgoing data.
+                        </xsd:documentation>
+                    </xsd:annotation>
+                    <xsd:simpleType>
+                        <xsd:restriction base="xsd:NMTOKEN">
+                            <xsd:enumeration value="JSON">
+                              <xsd:annotation>
+                                <xsd:documentation>
+                                  
+                                </xsd:documentation>
+                              </xsd:annotation>
+                            </xsd:enumeration>
+                            <xsd:enumeration value="POJO">
+                              <xsd:annotation>
+                                <xsd:documentation>
+                                 
+                                </xsd:documentation>
+                              </xsd:annotation>
+                            </xsd:enumeration>
+                        </xsd:restriction>
+                    </xsd:simpleType>
+                </xsd:attribute>
                 <xsd:attribute name="executor-ref" type="xsd:string">
                     <xsd:annotation>
                          <xsd:documentation>
@@ -55,7 +80,7 @@
     </xsd:element>
     
     <xsd:attributeGroup name="queryServiceTypes">
-        <xsd:attribute name="type">
+        <xsd:attribute name="type" default="JSON">
             <xsd:annotation>
                 <xsd:documentation>
                  

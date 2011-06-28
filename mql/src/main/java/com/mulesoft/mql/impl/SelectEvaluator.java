@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.mvel2.CompileException;
 import org.mvel2.MVEL;
 
 /**
@@ -65,6 +66,11 @@ public class SelectEvaluator {
             for (Map.Entry<String,Serializable> e : compiledExpressions.entrySet()) {
                 PropertyUtils.setProperty(t, e.getKey(), MVEL.executeExpression(e.getValue(), vars));
             }
+
+            for (Map.Entry<String,SelectEvaluator> e : objectProperties.entrySet()) {
+                PropertyUtils.setProperty(t, e.getKey(), e.getValue().evaluate(vars));
+            }
+            
             return t;
         } catch (ClassNotFoundException e1) {
             throw new QueryException(MessageFormat.format("Select class {0} was not found.", clsName), e1);
@@ -88,10 +94,14 @@ public class SelectEvaluator {
     }
 
     public Object evaluate(Map<String, Object> vars) {
-        if (objectBuilder.getTransformClass() == null) {
-            return transformToMap(vars);
-        } else {
-            return transformToPojo(objectBuilder.getTransformClass(), vars);
+        try {
+            if (objectBuilder.getTransformClass() == null) {
+                return transformToMap(vars);
+            } else {
+                return transformToPojo(objectBuilder.getTransformClass(), vars);
+            }
+        } catch (CompileException pae) {
+            throw new QueryException(pae.getMessage() + ". Context is: " + vars, pae);
         }
     }
 

@@ -9,18 +9,39 @@
  */
 package com.mulesoft.mql.example;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UserManager {
-    public List<User> getUsers() {
-        List<User> users = new ArrayList<User>();
+    // a Map of Users keyed by their email
+    private Map<String,User> users = new HashMap<String,User>();
+    
+    public UserManager() {
+        super();
         
         User user = new User();
         user.setName("Dan Diephouse");
         user.setEmail("dan@mulesoft.com");
-        users.add(user);
         
-        return users;
+        Address a = new Address();
+        a.setAddress("123 Main St");
+        a.setCity("San Francisco");
+        a.setState("CA");
+        a.setCountry("USA");
+        user.setAddress(a);
+        
+        users.put(user.getEmail(), user);
+    }
+    
+    public Collection<User> getUsers() {
+        return users.values();
+    }
+    
+    public void addUser(User user) {
+        if (user.getEmail() == null) {
+            throw new NullPointerException("User email cannot be null");
+        }
+        users.put(user.getEmail(), user);
     }
 }

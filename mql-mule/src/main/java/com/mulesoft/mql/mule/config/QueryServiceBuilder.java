@@ -15,7 +15,7 @@ import org.mule.api.MuleException;
 import org.mule.construct.builder.AbstractFlowConstructWithSingleInboundEndpointBuilder;
 
 import com.mulesoft.mql.mule.QueryService;
-import com.mulesoft.mql.mule.QueryService.Type;
+import com.mulesoft.mql.mule.Type;
 
 public class QueryServiceBuilder extends AbstractFlowConstructWithSingleInboundEndpointBuilder<QueryServiceBuilder, QueryService>{
 

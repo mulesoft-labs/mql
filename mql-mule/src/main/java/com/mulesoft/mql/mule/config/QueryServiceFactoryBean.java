@@ -16,7 +16,7 @@ import org.mule.config.spring.util.SpringBeanLookup;
 import org.mule.construct.builder.AbstractFlowConstructBuilder;
 
 import com.mulesoft.mql.mule.QueryService;
-import com.mulesoft.mql.mule.QueryService.Type;
+import com.mulesoft.mql.mule.Type;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

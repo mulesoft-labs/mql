@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:spring="http://www.springframework.org/schema/beans"
+    xmlns:mql="http://www.mulesoft.org/schema/mule/mql" 
+    xmlns:jersey="http://www.mulesoft.org/schema/mule/jersey"
+    xmlns:json="http://www.mulesoft.org/schema/mule/json"
+    xsi:schemaLocation="
+               http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+               http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
+               http://www.mulesoft.org/schema/mule/mql http://www.mulesoft.org/schema/mule/mql/3.1/mule-mql.xsd
+               http://www.mulesoft.org/schema/mule/jersey http://www.mulesoft.org/schema/mule/jersey/3.1/mule-jersey.xsd
+               http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/3.1/mule-json.xsd
+               ">
+               
+    <!-- Converts the old User object to the new version -->
+    <mql:transform name="V1-to-V2"
+         type="JSON"
+         query="from payload as u 
+                select new(com.mulesoft.mql.example.User) { 
+                  name = u.name,
+                  email = u.email,
+                  address = new(com.mulesoft.mql.example.Address) {
+                     address = u.address,
+                     city = u.city,
+                     state = u.state
+                  }
+                }" />
+
+    <!-- Converts the new User object to the old version -->
+    <mql:transform name="V2-to-V1" 
+         type="JSON"
+         query="from payload as u 
+                select new { 
+                  name = u.name,
+                  email = u.email,
+                  address = u.address.address,
+                  city = u.address.city,
+                  state = u.address.state
+                }"/>
+
+    <flow name="v1">
+        <inbound-endpoint address="http://localhost:9002/api/v1/users" exchange-pattern="request-response"/>
+        
+        <!-- Transform from old version -->
+        <choice>
+            <when expression="message.getInboundProperty('http.method') == 'POST' || message.getInboundProperty('http.method') == 'PUT'" evaluator="groovy">
+                <transformer ref="V1-to-V2"/>
+            </when>
+            <otherwise>
+                <echo-component/>
+            </otherwise>
+        </choice>
+        
+        <jersey:resources>
+            <component>
+                <singleton-object class="com.mulesoft.mql.example.UserResource"/>
+            </component>
+        </jersey:resources>
+        
+        <!-- Transform to old version -->
+        <transformer ref="V2-to-V1"/>
+    </flow>
+        
+</mule>
+

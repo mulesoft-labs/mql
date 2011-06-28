@@ -56,6 +56,13 @@
             <artifactId>mule-module-ibeans</artifactId>
             <version>${muleVersion}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>org.mule.modules</groupId>
+            <artifactId>mule-module-scripting</artifactId>
+            <version>${muleVersion}</version>
+        </dependency>
+        
 
         <dependency>
             <groupId>org.mule.tests</groupId>
@@ -69,11 +76,13 @@
         	<artifactId>mule-transport-jdbc</artifactId>
         	<version>${muleVersion}</version>
         </dependency>
+        
         <dependency>
         	<groupId>org.mule.modules</groupId>
         	<artifactId>mule-module-sfdc</artifactId>
         	<version>3.0.2</version>
         </dependency>
+        
         <dependency>
         	<groupId>xerces</groupId>
         	<artifactId>xercesImpl</artifactId>

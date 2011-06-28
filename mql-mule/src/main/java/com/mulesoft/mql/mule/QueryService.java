@@ -27,10 +27,6 @@ import org.mule.transport.http.transformers.FormTransformer;
 
 public class QueryService extends AbstractFlowConstruct {
 
-    public enum Type {
-        JSON,
-        POJO
-    }
     
     private final String query;
     private final Type type;
@@ -76,7 +72,7 @@ public class QueryService extends AbstractFlowConstruct {
             
             public boolean accept(MuleMessage msg) {
                 Object ct = msg.getInboundProperty("Content-Type");
-                if (ct != null && ct.toString().contains("application/json")) {
+                if (ct == null || ct.toString().contains("application/json")) {
                     return true;
                 }
                 return false;
