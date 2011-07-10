@@ -14,6 +14,7 @@ import org.mule.tck.FunctionalTestCase;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.LoggingFilter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,8 +63,9 @@ public class JerseyVersioningTest extends FunctionalTestCase {
         config.getClasses().add(JacksonJsonProvider.class);
         JacksonJsonProvider jsonProvider = new JacksonJsonProvider(new ObjectMapper());
         config.getSingletons().add(jsonProvider);
-
+        
         Client client = Client.create(config);
+        client.addFilter(new LoggingFilter());
         return client;
     }
     

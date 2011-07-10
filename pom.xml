@@ -9,6 +9,7 @@
     <modules>
         <module>mql</module>
         <module>mql-mule</module>
+        <module>distributions</module>
     </modules>
     <build>
         <plugins>

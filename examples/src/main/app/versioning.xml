@@ -30,7 +30,8 @@
     <!-- Converts the new User object to the old version -->
     <mql:transform name="V2-to-V1" 
          type="JSON"
-         query="from payload as u 
+         query="
+         from payload as u 
                 select new { 
                   name = u.name,
                   email = u.email,
@@ -38,19 +39,15 @@
                   city = u.address.city,
                   state = u.address.state
                 }"/>
-
+    
     <flow name="v1">
         <inbound-endpoint address="http://localhost:9002/api/v1/users" exchange-pattern="request-response"/>
         
-        <!-- Transform from old version -->
-        <choice>
-            <when expression="message.getInboundProperty('http.method') == 'POST' || message.getInboundProperty('http.method') == 'PUT'" evaluator="groovy">
-                <transformer ref="V1-to-V2"/>
-            </when>
-            <otherwise>
-                <echo-component/>
-            </otherwise>
-        </choice>
+        <!-- Transform from old version if there is a request payload -->
+        <processor-chain>
+            <expression-filter expression="message.getInboundProperty('http.method') == 'POST' || message.getInboundProperty('http.method') == 'PUT'" evaluator="groovy"/>
+            <transformer ref="V1-to-V2"/>
+        </processor-chain>
         
         <jersey:resources>
             <component>
@@ -62,5 +59,13 @@
         <transformer ref="V2-to-V1"/>
     </flow>
         
+    <flow name="v2">
+        <inbound-endpoint address="http://localhost:9002/api/v2/users" exchange-pattern="request-response"/>
+        <jersey:resources>
+            <component>
+                <singleton-object class="com.mulesoft.mql.example.UserResource"/>
+            </component>
+        </jersey:resources>
+    </flow>
 </mule>
 

@@ -12,9 +12,9 @@
     <name>Mashup Query Language</name>
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.2</version>
+            <groupId>org.mvel</groupId>
+            <artifactId>mvel2</artifactId>
+            <version>2.0.10</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -32,27 +32,26 @@
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>3.0.3.RELEASE</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+        
         <dependency>
         	<groupId>org.easymock</groupId>
         	<artifactId>easymock</artifactId>
         	<version>3.0</version>
-        	<type>jar</type>
-        	<scope>compile</scope>
+        	<scope>test</scope>
         </dependency>
         <dependency>
-        	<groupId>org.mvel</groupId>
-        	<artifactId>mvel2</artifactId>
-        	<version>2.0.10</version>
-        	<type>jar</type>
-        	<scope>compile</scope>
-        </dependency>
-        <dependency>
-        	<groupId>org.springframework</groupId>
-        	<artifactId>spring-context</artifactId>
-        	<version>3.0.3.RELEASE</version>
-        	<type>jar</type>
-        	<scope>compile</scope>
-            <optional>true</optional>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
