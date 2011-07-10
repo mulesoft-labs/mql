@@ -9,7 +9,7 @@
     <modules>
         <module>mql</module>
         <module>mql-mule</module>
-        <module>distributions</module>
+        <module>distribution</module>
     </modules>
     <build>
         <plugins>
@@ -22,6 +22,14 @@
                 </configuration>
             </plugin>
         </plugins>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-webdav</artifactId>
+                <version>1.0-beta-2</version>
+            </extension>
+        </extensions>
+        
     </build>
     <distributionManagement>
         <repository>
