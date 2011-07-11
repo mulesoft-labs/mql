@@ -4,7 +4,7 @@
     <groupId>com.mulesoft.mql</groupId>
     <artifactId>mql-parent</artifactId>
     <name>Mashup Query Language Parent</name>
-    <version>0.2-SNAPSHOT</version> 
+    <version>0.9-SNAPSHOT</version> 
     <packaging>pom</packaging>  
     <modules>
         <module>mql</module>
