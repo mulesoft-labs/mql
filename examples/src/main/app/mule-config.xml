@@ -12,18 +12,9 @@
                ">
 
     <spring:beans>
-        <!-- Load passwords from external file -->
-        <spring:bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-            <spring:property name="locations">
-                <spring:list>
-                    <spring:value>example.properties</spring:value>
-                </spring:list>
-            </spring:property>
-            <spring:property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
-        </spring:bean>
-        
         <spring:import resource="activity.xml" />
         <spring:import resource="salesforce-join.xml" />
+        <spring:import resource="versioning.xml" />
     </spring:beans>
 
 </mule>

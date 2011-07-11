@@ -23,6 +23,7 @@ import org.mule.processor.NullMessageProcessor;
 import org.mule.processor.ResponseMessageProcessorAdapter;
 import org.mule.routing.ChoiceRouter;
 import org.mule.transformer.types.DataTypeFactory;
+import org.mule.transport.http.HttpConnector;
 import org.mule.transport.http.transformers.FormTransformer;
 
 public class QueryService extends AbstractFlowConstruct {
@@ -72,7 +73,10 @@ public class QueryService extends AbstractFlowConstruct {
             
             public boolean accept(MuleMessage msg) {
                 Object ct = msg.getInboundProperty("Content-Type");
-                if (ct == null || ct.toString().contains("application/json")) {
+                String method = (String)msg.getInboundProperty(HttpConnector.HTTP_METHOD_PROPERTY);
+
+                if ((ct == null && (method == null || !method.toUpperCase().equals("GET")))
+                        || (ct != null && ct.toString().contains("application/json"))) {
                     return true;
                 }
                 return false;
