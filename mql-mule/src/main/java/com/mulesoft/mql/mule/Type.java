@@ -11,5 +11,6 @@ package com.mulesoft.mql.mule;
 
 public enum Type {
     POJO,
-    JSON
+    JSON,
+    AUTO
 }

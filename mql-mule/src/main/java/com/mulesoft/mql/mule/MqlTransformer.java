@@ -13,6 +13,7 @@ import org.mule.transformer.AbstractMessageTransformer;
 import com.mulesoft.mql.LazyQueryContext;
 import com.mulesoft.mql.Query;
 
+import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -54,6 +55,22 @@ public class MqlTransformer extends AbstractMessageTransformer {
         
         if (Type.JSON.equals(type)) {
             isJson = true;
+        } else if (Type.AUTO.equals(type)) {
+            String ct = message.getOutboundProperty("Content-Type");
+            if (ct == null) {
+                ct = message.getInvocationProperty("Content-Type");
+                
+                if (ct == null) {
+                    ct = message.getInboundProperty("Content-Type");
+                }
+            } 
+            
+            if (ct != null && ct.startsWith("application/json") && isData(message.getPayload())) {
+                isJson = true;
+            }
+        }
+        
+        if (isJson) {
             // hack
             if (payload instanceof OutputHandler) {
                 try {
@@ -80,6 +97,11 @@ public class MqlTransformer extends AbstractMessageTransformer {
         }
         
         return result;
+    }
+
+    private boolean isData(Object payload) {
+        return payload instanceof InputStream || payload instanceof OutputHandler || payload instanceof String
+                || payload instanceof byte[];
     }
 
     public void setQuery(String query) {

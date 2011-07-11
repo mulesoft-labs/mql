@@ -15,7 +15,6 @@
                
     <!-- Converts the old User object to the new version -->
     <mql:transform name="V1-to-V2"
-         type="JSON"
          query="from payload as u 
                 select new(com.mulesoft.mql.example.User) { 
                   name = u.name,
@@ -29,7 +28,6 @@
 
     <!-- Converts the new User object to the old version -->
     <mql:transform name="V2-to-V1" 
-         type="JSON"
          query="
          from payload as u 
                 select new { 

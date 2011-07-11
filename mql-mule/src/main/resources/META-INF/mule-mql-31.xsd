@@ -33,7 +33,7 @@
                          </xsd:documentation>
                      </xsd:annotation>
                 </xsd:attribute>
-                <xsd:attribute name="type" default="POJO">
+                <xsd:attribute name="type" default="AUTO">
                     <xsd:annotation>
                         <xsd:documentation>                            
                             The format of the incoming and outgoing data.
@@ -52,6 +52,13 @@
                               <xsd:annotation>
                                 <xsd:documentation>
                                  
+                                </xsd:documentation>
+                              </xsd:annotation>
+                            </xsd:enumeration>
+                            <xsd:enumeration value="AUTO">
+                              <xsd:annotation>
+                                <xsd:documentation>
+                                   Determine how to transform the data based on the Content-Type and payload.
                                 </xsd:documentation>
                               </xsd:annotation>
                             </xsd:enumeration>
