@@ -11,6 +11,7 @@
         <module>mql-mule</module>
         <module>distribution</module>
     </modules>
+    
     <build>
         <plugins>
             <plugin>
@@ -29,18 +30,24 @@
                 <version>1.0-beta-2</version>
             </extension>
         </extensions>
-        
     </build>
+    
+    <scm>
+        <connection>scm:git:git://github.com:mulesoft/mql.git</connection>
+        <developerConnection>scm:git:git@github.com:mulesoft/mql.git</developerConnection>
+        <url>http://github.com/mulesoft/mql</url>
+    </scm>
+    
     <distributionManagement>
         <repository>
-            <id>muleforge.webdav.releases</id>
-            <name>MuleSoft Release Repository</name>
-            <url>dav:https://repository.muleforge.org/release/</url>
+            <id>mulesoft.releases</id>
+            <name>Muleforge Releases Repository</name>
+            <url>https://repository.mulesoft.org/releases/</url>
         </repository>
         <snapshotRepository>
-            <id>muleforge.webdav.snapshots</id>
-            <name>MuleSoft Snapshot Repository</name>
-            <url>dav:https://repository.muleforge.org/snapshot/</url>
+            <id>mulesoft.snapshots</id>
+            <name>Muleforge Snapshots Repository</name>
+            <url>https://repository.mulesoft.org/snapshots/</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
     </distributionManagement>

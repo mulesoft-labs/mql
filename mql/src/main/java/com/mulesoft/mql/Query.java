@@ -108,14 +108,14 @@ public class Query {
      * A short cut for Query.create(queryString).execute(items);
      */
     public static <T> T execute(String queryString, Collection<?> items) {
-        return create(queryString).execute(items);
+        return create(queryString).<T>execute(items);
     }
     
     /**
      * A short cut for Query.create(queryString).execute(context);
      */
     public static <T> T execute(String queryString, Map<String,Object> context) {
-        return create(queryString).execute(context);
+        return create(queryString).<T>execute(context);
     }
     
     /**
@@ -127,7 +127,7 @@ public class Query {
      * @return
      */
     public <T> T execute(Collection<?> items) {
-        return execute(items, getDefaultSelectObject());
+        return this.<T>execute(items, getDefaultSelectObject());
     }
     
     /**
@@ -140,7 +140,7 @@ public class Query {
     public <T> T execute(Collection<?> items, String as) {
         Map<String,Object> context = new HashMap<String,Object>();
         context.put(as, items);
-        return execute(context);
+        return this.<T>execute(context);
     }
     
     public <T> T execute(final Map<String,Object> context) {
