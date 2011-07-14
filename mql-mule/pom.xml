@@ -18,7 +18,7 @@
         <dependency>
             <groupId>com.mulesoft.mql</groupId>
             <artifactId>mql</artifactId>
-            <version>${version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.mulesoft.mql</groupId>
