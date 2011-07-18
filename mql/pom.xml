@@ -2,12 +2,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.mulesoft.mql</groupId>
+        <groupId>org.mule.mql</groupId>
         <artifactId>mql-parent</artifactId>
         <version>0.9-SNAPSHOT</version>
     </parent>
     
-    <groupId>com.mulesoft.mql</groupId>
+    <groupId>org.mule.mql</groupId>
     <artifactId>mql</artifactId>
     <name>Mashup Query Language</name>
     <dependencies>
@@ -83,12 +83,12 @@
     </build>
     
     <scm>
-        <connection>scm:git:git://github.com:mulesoft/mql.git
+        <connection>scm:git:git://github.org.mule.mql.git
         </connection>
         <developerConnection>
-            scm:git:git@github.com:mulesoft/mql.git
+            scm:git:git@github.org.mule.mql.git
         </developerConnection>
-        <url>http://github.com/mulesoft/mql</url>
+        <url>http://github.org.mule.mql</url>
     </scm>
 
     <organization>

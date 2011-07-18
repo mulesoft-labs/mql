@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.mulesoft.mql</groupId>
+    <groupId>org.mule.mql</groupId>
     <artifactId>mql-parent</artifactId>
     <name>Mashup Query Language Parent</name>
     <version>0.9-SNAPSHOT</version> 
@@ -34,9 +34,9 @@
     </build>
     
     <scm>
-        <connection>scm:git:git://github.com:mulesoft/mql.git</connection>
-        <developerConnection>scm:git:git@github.com:mulesoft/mql.git</developerConnection>
-        <url>http://github.com/mulesoft/mql</url>
+        <connection>scm:git:git://github.org.mule.mql.git</connection>
+        <developerConnection>scm:git:git@github.org.mule.mql.git</developerConnection>
+        <url>http://github.org.mule.mql</url>
     </scm>
     
     <distributionManagement>
