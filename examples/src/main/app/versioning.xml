@@ -16,10 +16,10 @@
     <!-- Converts the old User object to the new version -->
     <mql:transform name="V1-to-V2"
          query="from payload as u 
-                select new(com.mulesoft.mql.example.User) { 
+                select new(org.mule.mql.example.User) { 
                   name = u.name,
                   email = u.email,
-                  address = new(com.mulesoft.mql.example.Address) {
+                  address = new(org.mule.mql.example.Address) {
                      address = u.address,
                      city = u.city,
                      state = u.state
