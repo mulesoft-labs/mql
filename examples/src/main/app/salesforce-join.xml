@@ -16,8 +16,6 @@
         password="${salesforce.password}"  
         securityToken="${salesforce.securityToken}"/>
     
-    <spring:bean name="userManager" class="com.mulesoft.mql.example.UserManager"/>
-
     <mql:query-service
     	name="JoinCompanyAndPhone"
     	address="http://localhost:9002/users"

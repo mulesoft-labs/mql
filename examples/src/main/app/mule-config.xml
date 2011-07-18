@@ -11,6 +11,8 @@
                http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/3.1/mule-json.xsd
                ">
 
+    <spring:bean name="userManager" class="org.mule.mql.example.UserManager"/>
+
     <spring:beans>
         <spring:import resource="activity.xml" />
         <spring:import resource="salesforce-join.xml" />

@@ -7,7 +7,7 @@
  * license, a copy of which has been included with this distribution in the
  * LICENSE.txt file.
  */
-package com.mulesoft.mql.example;
+package org.mule.mql.example;
 
 import java.util.Collection;
 

@@ -49,7 +49,7 @@
         
         <jersey:resources>
             <component>
-                <singleton-object class="com.mulesoft.mql.example.UserResource"/>
+                <singleton-object class="org.mule.mql.example.UserResource"/>
             </component>
         </jersey:resources>
         
@@ -61,7 +61,7 @@
         <inbound-endpoint address="http://localhost:9002/api/v2/users" exchange-pattern="request-response"/>
         <jersey:resources>
             <component>
-                <singleton-object class="com.mulesoft.mql.example.UserResource"/>
+                <singleton-object class="org.mule.mql.example.UserResource"/>
             </component>
         </jersey:resources>
     </flow>
