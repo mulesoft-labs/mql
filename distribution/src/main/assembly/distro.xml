@@ -20,25 +20,25 @@
     <dependencySets>
         <dependencySet>
             <includes>
-                <include>com.mulesoft.mql:mql-examples:zip</include>
+                <include>org.mule.mql:mql-examples:zip</include>
             </includes>
             <outputDirectory>examples</outputDirectory>
             <useProjectArtifact>false</useProjectArtifact>
         </dependencySet>
         <dependencySet>
             <includes>
-                <include>com.mulesoft.mql:mql</include>
+                <include>org.mule.mql:mql</include>
             </includes>
             <excludes>
-                <exclude>com.mulesoft.mql:mql-examples:zip</exclude>
-                <exclude>com.mulesoft.mql:mql-mule:zip</exclude>
+                <exclude>org.mule.mql:mql-examples:zip</exclude>
+                <exclude>org.mule.mql:mql-mule:zip</exclude>
             </excludes>
             <outputDirectory>lib</outputDirectory>
             <useTransitiveFiltering>true</useTransitiveFiltering>
         </dependencySet>
         <dependencySet>
             <includes>
-                <include>com.mulesoft.mql:mql-mule</include>
+                <include>org.mule.mql:mql-mule</include>
             </includes>
             <outputDirectory>lib</outputDirectory>
             <useTransitiveDependencies>false</useTransitiveDependencies>
