@@ -103,6 +103,14 @@
                 <configuration>
                     <inclusions>
                         <inclusion>
+                            <groupId>org.mule.mql</groupId>
+                            <artifactId>mql</artifactId>
+                        </inclusion>
+                        <inclusion>
+                            <groupId>org.mule.mql</groupId>
+                            <artifactId>mql-mule</artifactId>
+                        </inclusion>
+                        <inclusion>
                             <groupId>org.mule.modules</groupId>
                             <artifactId>mule-module-sfdc</artifactId>
                         </inclusion>

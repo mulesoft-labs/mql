@@ -12,7 +12,7 @@
                http://www.mulesoft.org/schema/mule/mql http://www.mulesoft.org/schema/mule/mql/3.1/mule-mql.xsd
                http://www.mulesoft.org/schema/mule/twitter http://www.mulesoft.org/schema/mule/twitter/3.1/mule-twitter.xsd
                http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/3.1/mule-json.xsd
-               http://www.mulesoft.org/schema/mule/yammer http://www.mulesoft.org/schema/mule/yammer/1.0-SNAPSHOT/mule-yammer.xsd
+               http://www.mulesoft.org/schema/mule/yammer http://www.mulesoft.org/schema/mule/yammer/1.0-beta-1/mule-yammer.xsd
                ">
     <twitter:config name="twitter" 
                     consumerKey="${twitter.consumer.key}" 

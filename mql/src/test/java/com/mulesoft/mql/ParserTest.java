@@ -1,9 +1,5 @@
 package com.mulesoft.mql;
 
-import static com.mulesoft.mql.ObjectBuilder.newObject;
-import static com.mulesoft.mql.Restriction.eq;
-import static com.mulesoft.mql.Restriction.property;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,10 +17,12 @@ public class ParserTest extends Assert {
     public void testSingleClause() {
         List<User> users = getUsers();
         
-        Collection<Map> result = 
+        Collection<User> result = 
             Query.execute("from users as u where u.division = 'Sales'", asMap("users", users));
         
         assertEquals(3, result.size());
+        
+        System.out.println(result.iterator().next().getClass());
     }
     
     private Map<String, Object> asMap(String key, Object value) {

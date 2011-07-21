@@ -182,8 +182,8 @@ public class Query {
         
         List resultList = new ArrayList();
         resultList = joinAndFilter(itemsAsMaps, resultList);
-        order(resultList);
         resultList = doSelect(resultList);
+        order(resultList);
         
         if (selectSingleObject) {
             return (T) (resultList.size() > 0 ? resultList.get(0) : null);
@@ -268,6 +268,12 @@ public class Query {
             }
             
             list = transformedObjects;
+        } else {
+            // Convert back from context to selected object
+            for (int i = 0; i < list.size(); i++) {
+                Map object = (Map)list.get(i);                
+                list.set(i, object.get(queryBuilder.getAs()));
+            }
         }
         return list;
     }
