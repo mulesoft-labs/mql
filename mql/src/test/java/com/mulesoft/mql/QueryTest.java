@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+import static com.mulesoft.mql.ObjectBuilder.newObject;
 import static com.mulesoft.mql.Restriction.*;
 
 import junit.framework.Assert;
@@ -21,7 +22,7 @@ public class QueryTest extends Assert {
             .orderby("income")
             .max(3)
             .where(eq(property("division"), "Sales"))
-            .select(new ObjectBuilder() 
+            .select(newObject()
                       .set("name", "firstName + ' ' + lastName")
                       .set("income", "income")).build();
         
