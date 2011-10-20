@@ -16,7 +16,7 @@ import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.processor.MessageProcessorChainBuilder;
 import org.mule.api.routing.filter.Filter;
 import org.mule.api.source.MessageSource;
-import org.mule.construct.AbstractFlowConstruct;
+import org.mule.construct.AbstractPipeline;
 import org.mule.module.json.transformers.JsonToObject;
 import org.mule.module.json.transformers.ObjectToJson;
 import org.mule.processor.NullMessageProcessor;
@@ -26,7 +26,7 @@ import org.mule.transformer.types.DataTypeFactory;
 import org.mule.transport.http.HttpConnector;
 import org.mule.transport.http.transformers.FormTransformer;
 
-public class QueryService extends AbstractFlowConstruct {
+public class QueryService extends AbstractPipeline {
 
     
     private final String query;
@@ -38,7 +38,7 @@ public class QueryService extends AbstractFlowConstruct {
         super(name, muleContext);
         this.type = type;
         this.query = query;
-        setMessageSource(messageSource);
+        this.messageSource = messageSource;
     }
 
     @Override

@@ -6,9 +6,9 @@
     xmlns:json="http://www.mulesoft.org/schema/mule/json"
     xsi:schemaLocation="
                http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-               http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.1/mule.xsd
-               http://www.mulesoft.org/schema/mule/mql http://www.mulesoft.org/schema/mule/mql/3.1/mule-mql.xsd
-               http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/3.1/mule-json.xsd
+               http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+               http://www.mulesoft.org/schema/mule/mql http://www.mulesoft.org/schema/mule/mql/current/mule-mql.xsd
+               http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
                ">
 
     <spring:bean name="userManager" class="org.mule.mql.example.UserManager"/>

@@ -1,2 +1,4 @@
 http\://www.mulesoft.org/schema/mule/mql/3.1/mule-mql.xsd=META-INF/mule-mql-31.xsd
 http\://www.mulesoft.org/schema/mule/mql/3.2/mule-mql.xsd=META-INF/mule-mql-32.xsd
+http\://www.mulesoft.org/schema/mule/mql/current/mule-mql.xsd=META-INF/mule-mql-32.xsd
+
