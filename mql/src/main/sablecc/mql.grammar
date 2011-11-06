@@ -138,6 +138,7 @@ Tokens
   number = [0-9]+;
   whitespace = (' ')+;
   question_mark = '?';
+  single = 'single';
 
   // literals
   floating_point_literal =
@@ -177,7 +178,10 @@ Productions
 
   as_statement = as [asvar]:identifier;
 
-  join_statement = {join} join [joinexpression]:mvel_expression [joinas]:as [asvar]:identifier on_statement? async_statement?;
+  join_statement = {join} join join_expression_list async_statement?;
+  join_expression_list = {single} join_expression | {multiple} join_expression_list comma join_expression;
+  join_expression = [joinexpression]:mvel_expression [joinas]:as [asvar]:identifier on_statement?;
+    
   on_statement = on [on_expression]:mvel_expression;
   async_statement = {async} async thread_statement? | {sync} sync;
   thread_statement = left_paren [thread_count]:integer_literal right_paren;
@@ -198,7 +202,7 @@ Productions
     {like} like;
 
   /* Select statement */
-  select_statement = {select_new} select new_statement select_new_item;
+  select_statement = {select_new} select single? new_statement select_new_item;
   new_statement = new class_parens?;
   class_name = {single} identifier | 
    	{multiple} class_name period identifier;
@@ -208,7 +212,8 @@ Productions
   	| select_new_item_property;
   select_new_item_property = 
     {select_mvel_property} identifier equals [equals_expression]:mvel_expression
-    | {select_new_object} identifier equals new_statement? select_new_item;
+    | {select_new_object} identifier equals new_statement? select_new_item
+    | {select_new_list} identifier equals from [fromvar]:mvel_expression as_statement? where_statement? select_statement?;
 
   /* MVEL expressions */
   mvel_operator = {plus} plus | {divide} divide | {multiply} multiply | {minus} minus 

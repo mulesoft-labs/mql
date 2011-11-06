@@ -1,5 +1,7 @@
 package com.mulesoft.mql;
 
+import com.mulesoft.mql.JoinBuilder.JoinExpression;
+
 import java.util.concurrent.Executor;
 
 
@@ -12,6 +14,7 @@ public class QueryBuilder {
     protected ObjectBuilder select;
     private Restriction restriction;
     private JoinBuilder join;
+    private boolean singleResult;
     
     public QueryBuilder where(Restriction restriction) {
         this.restriction = restriction;
@@ -77,11 +80,9 @@ public class QueryBuilder {
         return this;
     }
 
-
     public QueryBuilder join(String expression, String as) {
         join = new JoinBuilder();
-        join.expression(expression);
-        join.as(as);
+        join.expression(new JoinExpression(expression).as(as));
         return this;
     }
     
@@ -105,8 +106,7 @@ public class QueryBuilder {
      */
     public QueryBuilder joinAsync(String expression, String as, Executor executor) {
         join = new JoinBuilder()
-            .expression(expression)
-            .as(as)
+            .expression(new JoinExpression(expression).as(as))
             .async()
             .executor(executor);
         return this;
@@ -114,6 +114,15 @@ public class QueryBuilder {
 
     public JoinBuilder getJoin() {
         return join;
+    }
+
+    public QueryBuilder singleResult() {
+        singleResult = true;
+        return this;
+    }
+
+    public boolean isSingleResult() {
+        return singleResult;
     }
     
 }

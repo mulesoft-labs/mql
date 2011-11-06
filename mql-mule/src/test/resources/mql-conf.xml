@@ -41,5 +41,16 @@
                     totalTweets = mockTotalTweets
                    }" />
     </flow>
+    
+    
+    <flow name="twitter-by-ref">
+        <message-properties-transformer scope="invocation">
+            <add-message-property key="mockTotalTweets" value="1000"/>
+        </message-properties-transformer>
+        <mql:transform 
+            query="select new { 
+                    totalTweets = mockTotalTweets
+                   }" />
+    </flow>
 </mule>
 

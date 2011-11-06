@@ -130,7 +130,7 @@ public class ParserTest extends Assert {
     }
 
     @Test
-    public void testSubSelect() {
+    public void testSubObject() {
         List<User> users = getUsers();
         
         Collection<Map> result = 
@@ -150,6 +150,29 @@ public class ParserTest extends Assert {
         Map companyInfo = (Map) newItem.get("companyInfo");
         assertNotNull(companyInfo);
         assertEquals("Sales", companyInfo.get("division"));
+    }
+
+    @Test
+    public void testSubQuery() {
+        List<User> users = getUsers();
+        
+        Collection<Map> result = 
+            Query.execute(
+                    "from users as u where u.firstName = 'Joe' " +
+                    "select new { " +
+                    "  name = u.getFirstName() + ' ' + u.lastName, " +
+                    "  users = from users as child select new {" +
+                    "    name = child.getFirstName() + ' ' + child.lastName " +
+                    "  }" +
+                    "}", asMap("users", users));
+        
+        assertEquals(1, result.size());
+        
+        Map newItem = result.iterator().next();
+        assertEquals("Joe Schmoe", newItem.get("name"));
+        List<Map> children = (List<Map>) newItem.get("users");
+        assertNotNull(children);
+        assertEquals(users.size(), children.size());
     }
     
     @Test

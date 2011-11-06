@@ -1,37 +1,35 @@
 package com.mulesoft.mql.mule;
 
+import org.mule.api.DefaultMuleException;
+import org.mule.api.MuleEvent;
+import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.lifecycle.Initialisable;
 import org.mule.api.lifecycle.InitialisationException;
-import org.mule.api.transformer.TransformerException;
 import org.mule.api.transport.OutputHandler;
-import org.mule.api.transport.PropertyScope;
 import org.mule.client.DefaultLocalMuleClient;
 import org.mule.module.json.transformers.JsonToObject;
 import org.mule.module.json.transformers.ObjectToJson;
-import org.mule.transformer.AbstractMessageTransformer;
+import org.mule.processor.AbstractInterceptingMessageProcessor;
 
-import com.mulesoft.mql.LazyQueryContext;
 import com.mulesoft.mql.Query;
 
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-public class MqlTransformer extends AbstractMessageTransformer {
+public class MqlTransformer extends AbstractInterceptingMessageProcessor implements Initialisable {
     
     private JsonToObject JSON_TO_OBJECT = new JsonToObject();
     private ObjectToJson OBJECT_TO_JSON = new ObjectToJson();
     
     private String query;
-    private MuleClientWrapper clientWrapper;
     private Query compiledQuery;
     private Executor executor;
     private Type type = Type.POJO;
+    private DefaultLocalMuleClient muleClient;
     
-    @Override
     public void initialise() throws InitialisationException {
-        super.initialise();
-        
         JSON_TO_OBJECT.setReturnClass(java.lang.Object.class);
         JSON_TO_OBJECT.setMuleContext(muleContext);
         JSON_TO_OBJECT.initialise();
@@ -39,7 +37,8 @@ public class MqlTransformer extends AbstractMessageTransformer {
         OBJECT_TO_JSON.setMuleContext(muleContext);
         OBJECT_TO_JSON.initialise();
         
-        clientWrapper = new MuleClientWrapper(new DefaultLocalMuleClient(muleContext));
+        muleClient = new DefaultLocalMuleClient(muleContext);
+        
         compiledQuery = Query.create(query);
         compiledQuery.setDefaultSelectObject("payload");
         
@@ -48,7 +47,9 @@ public class MqlTransformer extends AbstractMessageTransformer {
         }
     }
 
-    public Object transformMessage(final MuleMessage message, String outputEncoding) throws TransformerException {
+    public MuleEvent process(MuleEvent event) throws MuleException {
+        MuleMessage message = event.getMessage();
+        
         // Auto transform from JSON if need be
         Object payload = message.getPayload();
         boolean isJson = false;
@@ -76,16 +77,18 @@ public class MqlTransformer extends AbstractMessageTransformer {
                 try {
                     message.getPayloadAsString();
                 } catch (Exception e) {
-                    throw new TransformerException(this, e);
+                    throw new DefaultMuleException("Could not convert message to a string.", e);
                 }
             }
-            payload = JSON_TO_OBJECT.transformMessage(message, outputEncoding);
+            payload = JSON_TO_OBJECT.transformMessage(message, event.getEncoding());
         }
         
         // execute query
         Map<String,Object> context = new MuleMessageQueryContext(message);
         context.put("payload", payload);
         context.put("message", message);
+
+        MuleClientWrapper clientWrapper = new MuleClientWrapper(event, muleClient, muleContext);
         context.put("mule", clientWrapper);
 
         Object result = compiledQuery.execute(context);
@@ -93,10 +96,12 @@ public class MqlTransformer extends AbstractMessageTransformer {
         // Auto transform back to JSON if need be
         if (isJson) {
             message.setPayload(result);
-            result = OBJECT_TO_JSON.transformMessage(message, outputEncoding);
+            result = OBJECT_TO_JSON.transformMessage(message, event.getEncoding());
         }
+
+        message.setPayload(result);
         
-        return result;
+        return this.processNext(event);
     }
 
     private boolean isData(Object payload) {
@@ -114,33 +119,5 @@ public class MqlTransformer extends AbstractMessageTransformer {
 
     public void setType(Type type) {
         this.type = type;
-    }
-
-    public class MuleMessageQueryContext extends LazyQueryContext {
-        private final MuleMessage message;
-
-        public MuleMessageQueryContext(MuleMessage message) {
-            this.message = message;
-        }
-
-        @Override
-        public Object load(String key) {
-            Object object = message.getProperty(key, PropertyScope.OUTBOUND);
-
-            // ugly but it works
-            if (object == null) {
-                object = message.getProperty(key, PropertyScope.INVOCATION);
-
-                if (object == null) {
-                    object = message.getProperty(key, PropertyScope.INBOUND);
-
-                    if (object == null) {
-                        object = muleContext.getRegistry().lookupObject(key);
-                    }
-                }
-            }
-
-            return object;
-        }
     }
 }

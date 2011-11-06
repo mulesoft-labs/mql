@@ -51,4 +51,8 @@ public class ObjectBuilder {
     public void set(String property, ObjectBuilder object) {
         propertyToValue.put(property, object);
     }
+
+    public void set(String property, QueryBuilder query) {
+        propertyToValue.put(property, query);
+    }
 }

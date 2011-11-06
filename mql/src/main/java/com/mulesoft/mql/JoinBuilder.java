@@ -9,50 +9,35 @@
  */
 package com.mulesoft.mql;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class JoinBuilder {
-    private String expression;
-    private String as;
-    private String on;
     private boolean async = true;
     private int threads = 10;
     private Executor executor;
+    private List<JoinExpression> expressions = new LinkedList<JoinExpression>();
     
     public static JoinBuilder expression(String expression, String as) {
         return new JoinBuilder()
-            .expression(expression)
-            .as(as);
-    }
-    
-    public String getExpression() {
-        return expression;
+            .expression(new JoinExpression(expression).as(as));
     }
     
     public JoinBuilder expression(String expression) {
-        this.expression = expression;
-        return this;
+        return expression(new JoinExpression(expression));
     }
     
-    public String getAs() {
-        return as;
-    }
-    
-    public JoinBuilder as(String as) {
-        this.as = as;
+    public JoinBuilder expression(JoinExpression expression) {
+        this.expressions.add(expression);
         return this;
     }
 
-    public String getOn() {
-        return on;
-    }
-
-    public JoinBuilder on(String on) {
-        this.on = on;
-        return this;
+    public List<JoinExpression> getExpressions() {
+        return expressions;
     }
 
     public boolean isAsync() {
@@ -93,5 +78,40 @@ public class JoinBuilder {
         }
         return executor;
     }
-    
+ 
+    public static class JoinExpression {
+        private String expression;
+        private String as;
+        private String on;
+
+        public JoinExpression(String expression) {
+            this.expression = expression;
+        }
+
+        public JoinExpression() {
+            super();
+        }
+
+        public String getExpression() {
+            return expression;
+        }
+        
+        public String getAs() {
+            return as;
+        }
+        
+        public JoinExpression as(String as) {
+            this.as = as;
+            return this;
+        }
+
+        public String getOn() {
+            return on;
+        }
+
+        public JoinExpression on(String on) {
+            this.on = on;
+            return this;
+        }
+    }
 }

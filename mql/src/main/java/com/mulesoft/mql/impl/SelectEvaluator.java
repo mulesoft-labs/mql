@@ -10,6 +10,7 @@
 package com.mulesoft.mql.impl;
 
 import com.mulesoft.mql.ObjectBuilder;
+import com.mulesoft.mql.Query;
 import com.mulesoft.mql.QueryBuilder;
 import com.mulesoft.mql.QueryException;
 
@@ -22,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.mvel2.CompileException;
 import org.mvel2.MVEL;
+import org.mvel2.ParserContext;
 
 /**
  * Wraps up the logic for the select statement. Builds new objects using info from ObjectBuilders.
@@ -29,6 +31,7 @@ import org.mvel2.MVEL;
 public class SelectEvaluator {
     private Map<String,Serializable> compiledExpressions = new HashMap<String,Serializable>();
     private Map<String,SelectEvaluator> objectProperties = new HashMap<String,SelectEvaluator>();
+    private Map<String,Query> queryProperties = new HashMap<String,Query>();
     private final QueryBuilder queryBuilder;
     private final ObjectBuilder objectBuilder;
 
@@ -37,14 +40,19 @@ public class SelectEvaluator {
         this.queryBuilder = queryBuilder;
         this.objectBuilder = objectBuilder;
         
+        ParserContext parserContext = new ParserContext();
+        parserContext.addPackageImport("java.util");
+        
         // Compile MVEL expressions and select evaluators
         for (Map.Entry<String,Object> e : objectBuilder.getPropertyToValues().entrySet()) {
             Object value = e.getValue();
             String propertyName = e.getKey();
             if (value instanceof String) {
-                compiledExpressions.put(propertyName, MVEL.compileExpression(value.toString()));
+                compiledExpressions.put(propertyName, MVEL.compileExpression(value.toString(), parserContext));
             } else if (value instanceof ObjectBuilder) {
                 objectProperties.put(propertyName, new SelectEvaluator(queryBuilder, (ObjectBuilder) value));
+            } else if (value instanceof QueryBuilder) {
+                queryProperties.put(propertyName, new Query((QueryBuilder) value));
             } else {
                 throw new IllegalStateException("Unrecognized value type for property " + propertyName);
             }
@@ -70,6 +78,10 @@ public class SelectEvaluator {
             for (Map.Entry<String,SelectEvaluator> e : objectProperties.entrySet()) {
                 PropertyUtils.setProperty(t, e.getKey(), e.getValue().evaluate(vars));
             }
+
+            for (Map.Entry<String,Query> e : queryProperties.entrySet()) {
+                PropertyUtils.setProperty(t, e.getKey(), e.getValue().execute(vars));
+            }
             
             return t;
         } catch (ClassNotFoundException e1) {
@@ -88,6 +100,10 @@ public class SelectEvaluator {
         
         for (Map.Entry<String,SelectEvaluator> e : objectProperties.entrySet()) {
             t.put(e.getKey(), e.getValue().evaluate(vars));
+        }
+        
+        for (Map.Entry<String,Query> e : queryProperties.entrySet()) {
+            t.put(e.getKey(), e.getValue().execute(vars));
         }
         
         return t;

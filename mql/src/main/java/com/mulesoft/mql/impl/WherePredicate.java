@@ -136,6 +136,7 @@ public class WherePredicate implements Predicate {
         Object right = evaluate(object, r.getRight());
         
         if (left != null && right != null) {
+            
             return ((Comparable)left).compareTo(right);
         } else if (left == null && right == null) {
             return 0;

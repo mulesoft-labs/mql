@@ -31,30 +31,32 @@ import org.apache.commons.collections.functors.TruePredicate;
 import org.mvel2.MVEL;
 
 /**
- * The central place for interfacing with MQL. To use, it is recommended that you 
- * compile your queries, save them, and then execute them. For instance:
+ * The central place for interfacing with MQL. To use, it is recommended that
+ * you compile your queries, save them, and then execute them. For instance:
+ * 
  * <pre>
  * 
- *
- *  // populate some data
- *  List<Person> persons = new ArrayList<Person>();
- *  persons.add(new Person("Dan", "Diephouse", "MuleSoft", "Engineering"));
- *  persons.add(new Person("Joe", "Sales", "MuleSoft", "Sales"));
- *  
- *  // create a context for the query
- *  Map<String,Object> context = new HashMap<String,Object>();
- *  context.put("persons", persons);
- *  
- *  // store this query and reuse it
- *  Query query = Query.compile("from people where division = 'Engineering'");
- *  
- *  // execute the query
- *  Collection<Person> result = 
- *      query.execute("from people where division = 'Engineering'", context);
+ * 
+ * // populate some data
+ * List&lt;Person&gt; persons = new ArrayList&lt;Person&gt;();
+ * persons.add(new Person(&quot;Dan&quot;, &quot;Diephouse&quot;, &quot;MuleSoft&quot;, &quot;Engineering&quot;));
+ * persons.add(new Person(&quot;Joe&quot;, &quot;Sales&quot;, &quot;MuleSoft&quot;, &quot;Sales&quot;));
+ * 
+ * // create a context for the query
+ * Map&lt;String, Object&gt; context = new HashMap&lt;String, Object&gt;();
+ * context.put(&quot;persons&quot;, persons);
+ * 
+ * // store this query and reuse it
+ * Query query = Query.compile(&quot;from people where division = 'Engineering'&quot;);
+ * 
+ * // execute the query
+ * Collection&lt;Person&gt; result = query.execute(&quot;from people where division = 'Engineering'&quot;, context);
  * </pre>
+ * 
  * Of course there is a handy shortcut method too:
+ * 
  * <pre>
- * Query.execute("from people where division = 'Engineering'", persons);
+ * Query.execute(&quot;from people where division = 'Engineering'&quot;, persons);
  * </pre>
  */
 public class Query {
@@ -86,14 +88,14 @@ public class Query {
     public static Query create(String queryString) {
         Lexer lexer = new Lexer(new PushbackReader(new StringReader(queryString)));
         Parser parser = new Parser(lexer);
-        
+
         try {
             Start ast = parser.parse();
 
             /* Get our Interpreter going. */
             MqlInterpreter interpreter = new MqlInterpreter();
             ast.apply(interpreter);
-            
+
             return interpreter.getQuery();
         } catch (ParserException e) {
             throw new QueryException(e);
@@ -103,51 +105,53 @@ public class Query {
             throw new QueryException(e);
         }
     }
-    
+
     /**
      * A short cut for Query.create(queryString).execute(items);
      */
     public static <T> T execute(String queryString, Collection<?> items) {
-        return create(queryString).<T>execute(items);
+        return create(queryString).<T> execute(items);
     }
-    
+
     /**
      * A short cut for Query.create(queryString).execute(context);
      */
-    public static <T> T execute(String queryString, Map<String,Object> context) {
-        return create(queryString).<T>execute(context);
+    public static <T> T execute(String queryString, Map<String, Object> context) {
+        return create(queryString).<T> execute(context);
     }
-    
+
     /**
-     * Execute the query against a collection of objects. These objects will get named as "items"
-     * in your variable context. Generally the execute(Map<String,Object>) method should be
-     * used, but this is just too handy to take out.
+     * Execute the query against a collection of objects. These objects will get
+     * named as "items" in your variable context. Generally the
+     * execute(Map<String,Object>) method should be used, but this is just too
+     * handy to take out.
+     * 
      * @param <T>
      * @param items
      * @return
      */
     public <T> T execute(Collection<?> items) {
-        return this.<T>execute(items, getDefaultSelectObject());
+        return this.<T> execute(items, getDefaultSelectObject());
     }
-    
+
     /**
-     * Execute the query against a collection of objects which will be given the specified 
-     * name inside the variable context.
+     * Execute the query against a collection of objects which will be given the
+     * specified name inside the variable context.
+     * 
      * @param <T>
      * @param items
      * @return
      */
     public <T> T execute(Collection<?> items, String as) {
-        Map<String,Object> context = new HashMap<String,Object>();
+        Map<String, Object> context = new HashMap<String, Object>();
         context.put(as, items);
-        return this.<T>execute(context);
+        return this.<T> execute(context);
     }
-    
-    public <T> T execute(final Map<String,Object> context) {
+
+    public <T> T execute(final Map<String, Object> context) {
         Collection<?> items;
         Object from = getFrom(context);
-        boolean selectSingleObject = false;
-        
+
         if (from instanceof Collection) {
             // transform a collection of objects
             items = (Collection<?>) from;
@@ -157,15 +161,14 @@ public class Query {
         } else {
             // support transformation on a single object
             items = Arrays.asList(from);
-            selectSingleObject = true;
         }
-        
-        List<Map<String,Object>> itemsAsMaps = new ArrayList<Map<String,Object>>();
+
+        List<Map<String, Object>> itemsAsMaps = new ArrayList<Map<String, Object>>();
         for (Object o : items) {
             if (o == null) {
                 throw new IllegalStateException("null items are not allowed in the list of queryable objects.");
             }
-            
+
             Map<String, Object> vars = new LazyQueryContext() {
                 @Override
                 // If a variable doesn't exist, try loading it from the context
@@ -174,21 +177,22 @@ public class Query {
                     return context.get(key);
                 }
             };
-            
+
             vars.putAll(context);
             vars.put(queryBuilder.getAs(), o);
             itemsAsMaps.add(vars);
         }
-        
+
         List resultList = new ArrayList();
         resultList = joinAndFilter(itemsAsMaps, resultList);
         resultList = doSelect(resultList);
         order(resultList);
-        
-        if (selectSingleObject) {
+
+        // TODO: optimize
+        if (queryBuilder.isSingleResult()) {
             return (T) (resultList.size() > 0 ? resultList.get(0) : null);
         }
-        
+
         return (T) resultList;
     }
 
@@ -205,7 +209,7 @@ public class Query {
     }
 
     protected void order(List resultList) {
-        // order the items 
+        // order the items
         if (queryBuilder.getOrderBy() != null) {
             Collections.sort(resultList, new OrderByComparator(queryBuilder));
         }
@@ -213,7 +217,7 @@ public class Query {
 
     protected List joinAndFilter(List<Map<String, Object>> itemsAsMaps, List resultList) {
         Predicate predicate = AndPredicate.getInstance(joinPredicate, wherePredicate);
-        
+
         if (joinBuilder != null && joinBuilder.isAsync() && itemsAsMaps.size() > 1) {
             return doAsyncJoinAndFilter(itemsAsMaps, resultList, predicate);
         } else {
@@ -231,24 +235,23 @@ public class Query {
         }
     }
 
-    protected List doAsyncJoinAndFilter(final List<Map<String, Object>> itemsAsMaps, 
-                                        final List resultList, 
+    protected List doAsyncJoinAndFilter(final List<Map<String, Object>> itemsAsMaps, final List resultList,
                                         final Predicate predicate) {
         Executor executor = joinBuilder.getExecutor();
 
         final List syncedList = Collections.synchronizedList(resultList);
-        
+
         CountDownLatch latch = new CountDownLatch(itemsAsMaps.size());
         for (int i = 0; i < itemsAsMaps.size(); i++) {
             Map<String, Object> object = itemsAsMaps.get(i);
             executor.execute(new JoinAndFilterRunnable(object, predicate, syncedList, latch));
         }
-        
+
         try {
             latch.await();
         } catch (InterruptedException e) {
         }
-        
+
         for (int i = resultList.size(); i >= queryBuilder.getMax(); i--) {
             resultList.remove(queryBuilder.getMax());
         }
@@ -262,16 +265,16 @@ public class Query {
             // Transform individual objects
             ArrayList transformedObjects = new ArrayList();
             for (Object o : list) {
-                Map<String, Object> vars = (Map<String,Object>) o;
-                
+                Map<String, Object> vars = (Map<String, Object>) o;
+
                 transformedObjects.add(selectEvaluator.evaluate(vars));
             }
-            
+
             list = transformedObjects;
         } else {
             // Convert back from context to selected object
             for (int i = 0; i < list.size(); i++) {
-                Map object = (Map)list.get(i);                
+                Map object = (Map) list.get(i);
                 list.set(i, object.get(queryBuilder.getAs()));
             }
         }
@@ -297,11 +300,11 @@ public class Query {
         }
         return wherePredicate;
     }
-    
+
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("from xxxx");
-        
+
         if (queryBuilder.as != null) {
             builder.append(" as ").append(queryBuilder.as);
         }
@@ -316,8 +319,9 @@ public class Query {
     }
 
     /**
-     * Set the object name that is used by default for a select only query. That is,
-     * if there is no 'from foo as f' clause, set the from object name.
+     * Set the object name that is used by default for a select only query. That
+     * is, if there is no 'from foo as f' clause, set the from object name.
+     * 
      * @param defaultFromObject
      */
     public void setDefaultSelectObject(String defaultFromObject) {
@@ -327,17 +331,15 @@ public class Query {
     public void setExecutor(Executor executor) {
         joinBuilder.executor(executor);
     }
-    
+
     private final class JoinAndFilterRunnable implements Runnable {
         private final Predicate predicate;
         private final Map<String, Object> object;
         private final List syncedList;
         private final CountDownLatch latch;
 
-        private JoinAndFilterRunnable(Map<String, Object> object, 
-                                      Predicate predicate, 
-                                      List syncedList, 
-                                      CountDownLatch latch) {
+        private JoinAndFilterRunnable(Map<String, Object> object, Predicate predicate, List syncedList,
+                CountDownLatch latch) {
             this.object = object;
             this.predicate = predicate;
             this.syncedList = syncedList;
@@ -349,7 +351,7 @@ public class Query {
                 if (syncedList.size() >= queryBuilder.getMax()) {
                     return;
                 }
-                
+
                 if (predicate.evaluate(object)) {
                     syncedList.add(object);
                 }
@@ -359,4 +361,3 @@ public class Query {
         }
     }
 }
-

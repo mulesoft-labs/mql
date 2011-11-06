@@ -1,11 +1,11 @@
 package com.mulesoft.mql.impl;
 
-import static com.mulesoft.mql.JoinBuilder.expression;
 import static com.mulesoft.mql.ObjectBuilder.newObject;
 import static com.mulesoft.mql.Restriction.and;
 import static com.mulesoft.mql.Restriction.or;
 
 import com.mulesoft.mql.JoinBuilder;
+import com.mulesoft.mql.JoinBuilder.JoinExpression;
 import com.mulesoft.mql.ObjectBuilder;
 import com.mulesoft.mql.Query;
 import com.mulesoft.mql.QueryBuilder;
@@ -19,16 +19,16 @@ import com.mulesoft.mql.grammar.node.AEqualsComparator;
 import com.mulesoft.mql.grammar.node.AFullQuery;
 import com.mulesoft.mql.grammar.node.AGtComparator;
 import com.mulesoft.mql.grammar.node.AGteComparator;
+import com.mulesoft.mql.grammar.node.AJoinExpression;
 import com.mulesoft.mql.grammar.node.AJoinJoinStatement;
 import com.mulesoft.mql.grammar.node.ALikeComparator;
 import com.mulesoft.mql.grammar.node.ALtComparator;
 import com.mulesoft.mql.grammar.node.ALteComparator;
-import com.mulesoft.mql.grammar.node.ANewStatement;
 import com.mulesoft.mql.grammar.node.ANotEqualsComparator;
 import com.mulesoft.mql.grammar.node.AOnStatement;
 import com.mulesoft.mql.grammar.node.AOrWhereExpression;
 import com.mulesoft.mql.grammar.node.ASelectMvelPropertySelectNewItemProperty;
-import com.mulesoft.mql.grammar.node.ASelectNewItem;
+import com.mulesoft.mql.grammar.node.ASelectNewListSelectNewItemProperty;
 import com.mulesoft.mql.grammar.node.ASelectNewObjectSelectNewItemProperty;
 import com.mulesoft.mql.grammar.node.ASelectNewSelectStatement;
 import com.mulesoft.mql.grammar.node.ASelectOnlyQuery;
@@ -42,17 +42,18 @@ import java.util.Stack;
 
 public class MqlInterpreter extends DepthFirstAdapter {
 
-    private QueryBuilder queryBuilder;
+    private Stack<QueryBuilder> queryBuilders = new Stack<QueryBuilder>();
     private Stack<Restriction> restrictions = new Stack<Restriction>();
     private Stack<ObjectBuilder> objectBuilder = new Stack<ObjectBuilder>();
     private JoinBuilder join;
-    private String transformClass;
+    private JoinExpression joinExpression;
 
     @Override
     public void caseAFullQuery(AFullQuery node) {
-        queryBuilder = new QueryBuilder();
+        QueryBuilder queryBuilder = new QueryBuilder();
         queryBuilder.from(parseSpaces(node.getFromvar().toString()));
-
+        queryBuilders.push(queryBuilder);
+        
         super.caseAFullQuery(node);
         
         if (restrictions.size() == 1) {
@@ -64,28 +65,37 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     @Override
     public void caseAAsStatement(AAsStatement node) {
-        queryBuilder.as(node.getAsvar().getText());
+        queryBuilders.peek().as(node.getAsvar().getText());
         super.caseAAsStatement(node);
     }
 
     @Override
     public void caseASelectOnlyQuery(ASelectOnlyQuery node) {
-        queryBuilder = new QueryBuilder();
+        QueryBuilder queryBuilder = new QueryBuilder();
+        queryBuilders.push(queryBuilder);
         super.caseASelectOnlyQuery(node);
     }
 
 
     @Override
     public void inAJoinJoinStatement(AJoinJoinStatement node) {
-        join = expression(parseSpaces(node.getJoinexpression().toString()), node.getAsvar().getText());
-        queryBuilder.join(join);
+        join = new JoinBuilder();
+        queryBuilders.peek().join(join);
 
         super.inAJoinJoinStatement(node);
     }
 
     @Override
+    public void caseAJoinExpression(AJoinExpression node) {
+         joinExpression = new JoinExpression(parseSpaces(node.getJoinexpression().toString())).as(node.getAsvar().getText());
+        join.expression(joinExpression);
+        
+        super.caseAJoinExpression(node);
+    }
+
+    @Override
     public void caseAOnStatement(AOnStatement node) {
-        join.on(parseSpaces(node.getOnExpression().toString()));
+        joinExpression.on(parseSpaces(node.getOnExpression().toString()));
         super.caseAOnStatement(node);
     }
 
@@ -164,9 +174,13 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     @Override
     public void caseASelectNewSelectStatement(ASelectNewSelectStatement node) {
-        if (queryBuilder.getSelect() == null) {
+        QueryBuilder qb = queryBuilders.peek();
+        if (qb.getSelect() == null) {
             objectBuilder.push(newObject());
-            queryBuilder.select(objectBuilder.peek());
+            qb.select(objectBuilder.peek());
+            if (node.getSingle() != null) {
+                qb.singleResult();
+            }
         }
         super.caseASelectNewSelectStatement(node);
     }
@@ -193,6 +207,23 @@ public class MqlInterpreter extends DepthFirstAdapter {
         ObjectBuilder next = objectBuilder.push(newObject());
         current.set(node.getIdentifier().getText(), next);
         super.inASelectNewObjectSelectNewItemProperty(node);
+    }
+
+    @Override
+    public void inASelectNewListSelectNewItemProperty(ASelectNewListSelectNewItemProperty node) {
+        QueryBuilder childQB = new QueryBuilder();
+        childQB.from(parseSpaces(node.getFromvar().toString()));
+        queryBuilders.push(childQB);
+        ObjectBuilder current = objectBuilder.peek();
+        current.set(node.getIdentifier().getText(), childQB);
+        super.inASelectNewListSelectNewItemProperty(node);
+    }
+
+    @Override
+    public void outASelectNewListSelectNewItemProperty(ASelectNewListSelectNewItemProperty node) {
+        super.outASelectNewListSelectNewItemProperty(node);
+        
+        queryBuilders.pop();
     }
 
     @Override
@@ -235,7 +266,7 @@ public class MqlInterpreter extends DepthFirstAdapter {
 
     protected int getNextQuoteIndex(String expr, int start) {
         int quoteStart = expr.indexOf('\'', start);
-        if (quoteStart != -1 && expr.charAt(quoteStart-1) == '\\') {
+        if (quoteStart != -1 && (quoteStart == 0 || expr.charAt(quoteStart-1) == '\\')) {
             return getNextQuoteIndex(expr, quoteStart + 1);
         }
         return quoteStart;
@@ -247,6 +278,6 @@ public class MqlInterpreter extends DepthFirstAdapter {
     }
 
     public Query getQuery() {
-        return queryBuilder.build();
+        return queryBuilders.peek().build();
     }
 }
