@@ -36,7 +36,7 @@ public class QueryServiceTest extends FunctionalTestCase {
         MuleMessage result = client.send("vm://select", new DefaultMuleMessage(payload, muleContext));
         
         payload = result.getPayloadAsString();
-        assertEquals("[{\"name\":\"first last\"}]", payload);
+        assertEquals("{\"name\":\"first last\"}", payload);
     }
     
     public void testPojo() throws Exception {

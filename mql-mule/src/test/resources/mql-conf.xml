@@ -14,7 +14,7 @@
     <flow name="select">
         <inbound-endpoint address="vm://select"
             exchange-pattern="request-response" />
-        <mql:transform query="from payload as p select new { name = p.firstName + ' ' + p.lastName }" />
+        <mql:transform query="from payload as p select single new { name = p.firstName + ' ' + p.lastName }" />
     </flow>
 
     <flow name="join">
@@ -23,7 +23,7 @@
         <mql:transform 
             query="from payload as p 
                      join mule.send('vm://twitter', p.twitterId) as twitterInfo
-                     select new { 
+                     select single new { 
                         name = firstName + ' ' + lastName, 
                         tweets = twitterInfo.totalTweets 
                      }" />
@@ -37,7 +37,7 @@
             <add-message-property key="mockTotalTweets" value="1000"/>
         </message-properties-transformer>
         <mql:transform 
-            query="select new { 
+            query="select single new { 
                     totalTweets = mockTotalTweets
                    }" />
     </flow>
@@ -48,7 +48,7 @@
             <add-message-property key="mockTotalTweets" value="1000"/>
         </message-properties-transformer>
         <mql:transform 
-            query="select new { 
+            query="select single new { 
                     totalTweets = mockTotalTweets
                    }" />
     </flow>

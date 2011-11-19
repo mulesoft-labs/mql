@@ -14,13 +14,13 @@
     <mql:query-service 
         name="select"
         address="vm://select" 
-        query="from payload as p select new { name = p.firstName + ' ' + p.lastName }" />
+        query="from payload as p select single new { name = p.firstName + ' ' + p.lastName }" />
 
     <mql:query-service 
         name="selectpojo"
         type="POJO"
         address="vm://selectpojo" 
-        query="from payload as p select new { name = p.firstName + ' ' + p.lastName }" />
+        query="from payload as p select single new { name = p.firstName + ' ' + p.lastName }" />
 
 </mule>
 
