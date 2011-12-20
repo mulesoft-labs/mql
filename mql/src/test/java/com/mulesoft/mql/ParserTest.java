@@ -1,6 +1,7 @@
 package com.mulesoft.mql;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,29 @@ public class ParserTest extends Assert {
         
         System.out.println(result.iterator().next().getClass());
     }
+
+    @Test 
+    public void testEmptyValue() {
+        List<User> users = new ArrayList<User>();
+        
+        users.add(new User("Joe", "Schmoe", null, 10000));
+        
+        Collection<Map> result = 
+            Query.execute("from users as u select new { division = u.?division }", asMap("users", users));
+        
+        assertEquals(1, result.size());
+    }
     
+    @Test 
+    public void testEmptyValueOnMap() {
+        List<Map<String, Object>> users = Arrays.asList(asMap("name", "Dan"));
+        
+        Collection<Map> result = 
+            Query.execute("from users as u where u.?division = 'Sales'", asMap("users", users));
+        
+        assertEquals(0, result.size());
+    }
+
     private Map<String, Object> asMap(String key, Object value) {
         Map<String, Object> map = new HashMap<String,Object>();
         map.put(key, value);
