@@ -23,7 +23,7 @@ public class OrderByComparator implements Comparator<Object> {
     	Object r1 = null, r2 = null;
     	if(o1 instanceof Map && o2 instanceof Map) {
     		Map<String,Object> o1Map = (Map<String,Object>) o1;
-    		Map<String,Object> o2Map = (Map<String,Object>)  o1;
+    		Map<String,Object> o2Map = (Map<String,Object>)  o2;
     		 r1 = MVEL.executeExpression(expression,o1Map.get(queryBuilder.getAs()), o1Map);
              r2 = MVEL.executeExpression(expression, o2Map.get(queryBuilder.getAs()), o2Map);
            
