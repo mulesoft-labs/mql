@@ -34,7 +34,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>3.0.3.RELEASE</version>
+            <version>5.2.23.RELEASE</version>
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
@@ -97,7 +97,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <execute />
+                                        <execute/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
