@@ -12,7 +12,7 @@
     <packaging>mule</packaging>
 
     <properties>
-        <muleVersion>3.1.2</muleVersion>
+        <muleVersion>3.6.0</muleVersion>
     </properties>
 
     <dependencies>
@@ -87,7 +87,7 @@
         <dependency>
         	<groupId>org.mule.modules</groupId>
         	<artifactId>mule-module-jersey</artifactId>
-        	<version>3.1.2</version>
+        	<version>3.6.0</version>
         	<type>jar</type>
         	<scope>compile</scope>
         </dependency>
