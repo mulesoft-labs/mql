@@ -12,7 +12,7 @@
     <packaging>mule</packaging>
 
     <properties>
-        <muleVersion>3.1.2</muleVersion>
+        <muleVersion>3.9.0</muleVersion>
     </properties>
 
     <dependencies>
