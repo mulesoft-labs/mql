@@ -10,7 +10,7 @@
 
     <name>Mashup Query Language for Mule</name>
     <properties>
-        <muleVersion>3.2.0</muleVersion>
+        <muleVersion>3.8.0</muleVersion>
     </properties>
 
     <dependencies>
